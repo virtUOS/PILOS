@@ -717,6 +717,7 @@ You can find the changelog for older versions there [here](https://github.com/TH
 [#2279]: https://github.com/THM-Health/PILOS/pull/2279
 [#2281]: https://github.com/THM-Health/PILOS/pull/2281
 [#2282]: https://github.com/THM-Health/PILOS/pull/2282
+<<<<<<< HEAD
 [#2304]: https://github.com/THM-Health/PILOS/pull/2304
 [#2313]: https://github.com/THM-Health/PILOS/issues/2313
 [#2319]: https://github.com/THM-Health/PILOS/pull/2319
@@ -750,6 +751,7 @@ You can find the changelog for older versions there [here](https://github.com/TH
 [#2664]: https://github.com/THM-Health/PILOS/issues/2664
 [#2665]: https://github.com/THM-Health/PILOS/pull/2665
 [#2686]: https://github.com/THM-Health/PILOS/pull/2686
+<<<<<<< HEAD
 [#2726]: https://github.com/THM-Health/PILOS/pull/2726
 [#2728]: https://github.com/THM-Health/PILOS/pull/2728
 [#2742]: https://github.com/THM-Health/PILOS/pull/2742
@@ -776,6 +778,7 @@ You can find the changelog for older versions there [here](https://github.com/TH
 [#2857]: https://github.com/THM-Health/PILOS/pull/2857
 [#2873]: https://github.com/THM-Health/PILOS/issues/2873
 [#2874]: https://github.com/THM-Health/PILOS/pull/2874
+<<<<<<< HEAD
 [#2877]: https://github.com/THM-Health/PILOS/issues/2877
 [#2879]: https://github.com/THM-Health/PILOS/issues/2879
 [#2880]: https://github.com/THM-Health/PILOS/pull/2880

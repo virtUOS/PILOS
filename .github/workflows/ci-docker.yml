@@ -6,7 +6,7 @@ on:
   #   types: [published]
   push:
     branches:
-      - guest-mods
+      - '*'
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest

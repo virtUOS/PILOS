@@ -36,6 +36,7 @@ class RoomSettingsResource extends JsonResource
             'short_description' => $this->short_description,
             'access_code' => $this->access_code,
             'room_type' => (new RoomTypeResource($this->roomType))->withDefaultRoomSettings()->withFeatures(),
+            'recap_available' => $this->isRecapAvailable(),
             $this->merge($this->getRoomSettings()),
         ];
     }

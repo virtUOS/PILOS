@@ -184,6 +184,13 @@ return [
         'no_data' => 'No room types found!',
         'no_data_filtered' => 'For the filter query no room types were found!',
         'preview' => 'Preview',
+        'recap' => [
+            'enforced_hint' => 'Meeting summaries can only be enforced off.',
+            'sink' => 'Summary destination',
+            'sink_description' => 'Name of the destination the summaries are delivered to. Lowercase letters, digits and hyphens.',
+            'type' => 'Meeting type',
+            'type_description' => 'Name of the meeting type that selects the summary template. Lowercase letters, digits and hyphens.',
+        ],
         'restrict' => 'Restrict usage',
         'restrict_description' => 'The usage of this room type and the corresponding servers will be restricted to the selected roles.',
         'search_aria' => 'Search room types',

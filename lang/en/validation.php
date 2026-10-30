@@ -118,6 +118,9 @@ return [
         'per_page' => 'Entries per page',
         'permissions' => 'Permissions',
         'phone' => 'Phone',
+        'recap' => 'Meeting summary',
+        'recap_sink' => 'Summary destination',
+        'recap_type' => 'Summary meeting type',
         'recording_attendance_retention_period' => 'Retention period of the attendance logging in days',
         'recording_meeting_usage_enabled' => 'Record utilisation of meetings',
         'recording_meeting_usage_retention_period' => 'Retention period of the meeting utilisation in days',
@@ -218,6 +221,15 @@ return [
             'in' => 'The selected language isn\'t supported by the server.',
         ],
         'password' => 'The password must contain at least one character from each of the following four categories: Uppercase letter (A - Z), lowercase letter (a - z), number (0 - 9), non-alphanumeric character (for example: !, $, #, or %).',
+        'recap_default' => [
+            'declined_if' => 'Meeting summaries can only be enforced off, not on.',
+        ],
+        'recap_sink' => [
+            'regex' => 'The :attribute may only contain lowercase letters, digits and hyphens, must start with a letter and be at most 63 characters long.',
+        ],
+        'recap_type' => [
+            'regex' => 'The :attribute may only contain lowercase letters, digits and hyphens, must start with a letter and be at most 63 characters long.',
+        ],
         'replacement_room_type' => [
             'exists' => 'Replacement room type invalid! A replacement room type is required because rooms are still assigned to this room type.',
             'not_in' => 'Replacement room type invalid! A replacement room type is required because rooms are still assigned to this room type.',
@@ -273,6 +285,7 @@ return [
     'custom_parameter_invalid' => 'The :parameter parameter value is invalid.',
     'custom_parameter_missing' => 'The :parameter parameter is missing a value.',
     'custom_parameter_not_found' => 'The :parameter parameter does not exist.',
+    'custom_parameter_reserved' => 'The :parameter parameter is reserved and cannot be set here.',
     'date' => 'The :attribute is not a valid date.',
     'date_equals' => 'The :attribute must be a date equal to :date.',
     'date_format' => 'The :attribute does not match the format :format.',

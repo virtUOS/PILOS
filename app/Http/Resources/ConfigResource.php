@@ -108,6 +108,9 @@ class ConfigResource extends JsonResource
                 'refresh_interval' => config('streaming.refresh_interval'),
                 'show_fps' => config('streaming.show_fps'),
             ],
+            'recap' => [
+                'enabled' => config('recap.enabled'),
+            ],
             'auth' => [
                 'local' => config('auth.local.enabled'),
                 'ldap' => config('ldap.enabled'),

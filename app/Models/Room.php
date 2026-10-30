@@ -122,6 +122,10 @@ class Room extends Model
             'cast' => 'boolean',
             'expert' => true,
         ],
+        'recap' => [
+            'cast' => 'boolean',
+            'expert' => false,
+        ],
     ];
 
     /**
@@ -400,6 +404,15 @@ class Room extends Model
 
         // If the expert mode is deactivated for the room and the setting is an expert-setting: use room type default value
         return $this->roomType[$settingName.'_default'];
+    }
+
+    /**
+     * Indicates whether the meeting summary (recap) can be activated for this room.
+     * Requires the feature to be enabled and the room owner to have logged in via OIDC (stored subject).
+     */
+    public function isRecapAvailable(): bool
+    {
+        return config('recap.enabled') && ! empty($this->owner->oidc_sub);
     }
 
     /**

@@ -426,6 +426,8 @@ return [
         ],
         'recordings' => [
             'auto_start_recording' => 'بدء التسجيل تلقائيًا',
+            'recap' => 'إنشاء ملخص للاجتماع (ذكاء اصطناعي)',
+            'recap_unavailable' => 'متاح بعد تسجيل دخولك مرة واحدة عبر OpenID Connect.',
             'record_attendance' => 'تسجيل حضور المشاركين',
             'record_video_conference' => 'تسجيل مؤتمر الفيديو',
             'title' => 'التسجيلات',

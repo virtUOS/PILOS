@@ -37,6 +37,14 @@ class RoomTypeRequest extends FormRequest
             $rules[$setting.'_enforced'] = ['required', 'boolean'];
         }
 
+        // Meeting summaries (recap) can only be enforced off, never on
+        $rules['recap_default'][] = 'declined_if:recap_enforced,true';
+
+        // Meeting type and sink of the summaries, required if the room type offers summaries
+        $recapOffered = config('recap.enabled') && ! $this->boolean('recap_enforced');
+        $rules['recap_type'] = [Rule::requiredIf($recapOffered), 'nullable', 'string', 'regex:/^[a-z][a-z0-9-]{0,62}$/'];
+        $rules['recap_sink'] = [Rule::requiredIf($recapOffered), 'nullable', 'string', 'regex:/^[a-z][a-z0-9-]{0,62}$/'];
+
         if ($this->roomType) {
             $rules['name'] = ['required', 'string', 'max:255', Rule::unique('room_types', 'name')->ignore($this->roomType->id)];
         }

@@ -487,6 +487,8 @@ return [
         ],
         'recordings' => [
             'auto_start_recording' => 'Enregistrement automatique au démarrage',
+            'recap' => 'Créer un résumé de la réunion (IA)',
+            'recap_unavailable' => 'Disponible après votre première connexion via OpenID Connect.',
             'record_attendance' => 'Enregistrer l\'historique des présences',
             'record_video_conference' => 'Enregistrer la vidéo conférence',
             'title' => 'Enregistrements',

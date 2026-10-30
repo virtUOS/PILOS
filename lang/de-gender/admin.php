@@ -182,6 +182,13 @@ return [
         'no_data' => 'Es sind keine Raumarten vorhanden!',
         'no_data_filtered' => 'Für die Suchanfrage wurden keine Raumarten gefunden!',
         'preview' => 'Vorschau',
+        'recap' => [
+            'enforced_hint' => 'Besprechungszusammenfassungen können nur ausgeschaltet erzwungen werden.',
+            'sink' => 'Ziel der Zusammenfassung',
+            'sink_description' => 'Name des Ziels, an das die Zusammenfassungen geliefert werden. Kleinbuchstaben, Ziffern und Bindestriche.',
+            'type' => 'Besprechungsart',
+            'type_description' => 'Name der Besprechungsart, die die Vorlage der Zusammenfassung bestimmt. Kleinbuchstaben, Ziffern und Bindestriche.',
+        ],
         'restrict' => 'Verwendung einschränken',
         'restrict_description' => 'Die Verwendung dieser Raumart und der dazugehörigen Server wird nur für die nachfolgend angegebenen Rollen gestattet.',
         'select_roles' => 'Rollen auswählen',

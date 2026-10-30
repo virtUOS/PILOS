@@ -131,6 +131,15 @@ class RoomPolicy
     }
 
     /**
+     * Determine whether the user can change the meeting summary (recap) setting of the room.
+     * Only the room owner can opt in, as the summary is delivered to the owner.
+     */
+    public function manageRecap(User $user, Room $room): bool
+    {
+        return $room->owner->is($user);
+    }
+
+    /**
      * Determine whether the user can transfer the room ownership
      *
      * @return bool

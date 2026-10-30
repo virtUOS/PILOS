@@ -1027,6 +1027,56 @@ class OIDCTest extends TestCase
         $this->assertEquals($user->roles()->pluck('name')->toArray(), ['admin', 'user']);
     }
 
+    /**
+     * Log in via the fake OIDC server with the given subject identifier
+     */
+    private function loginWithSubject(string $sub): void
+    {
+        $nonce = Str::random();
+        $state = Str::random();
+
+        $userInfoClaims = [
+            'sub' => $sub,
+            'given_name' => 'Ada',
+            'family_name' => 'Testperson',
+            'email' => 'ada.testperson@example.org',
+            'groups' => ['student'],
+        ];
+
+        $this->fake_oidc_server($sub, $this->faker->uuid(), $nonce, $userInfoClaims);
+
+        Session::put('openid_connect_state', $state);
+        Session::put('openid_connect_nonce', $nonce);
+
+        $this->get(route('auth.oidc.callback', [
+            'code' => Str::random(),
+            'state' => $state,
+        ]));
+    }
+
+    public function test_callback_stores_oidc_sub_for_new_user()
+    {
+        $this->loginWithSubject('fixture-sub-ada-0001');
+
+        $this->assertAuthenticated();
+        $this->assertEquals('fixture-sub-ada-0001', Auth::user()->oidc_sub);
+        $this->assertEquals('fixture-sub-ada-0001', Auth::user()->fresh()->oidc_sub);
+    }
+
+    public function test_callback_updates_oidc_sub_of_existing_user()
+    {
+        $user = User::factory()->create([
+            'authenticator' => 'oidc',
+            'external_id' => 'fixture-sub-ada-0001',
+            'oidc_sub' => 'fixture-sub-stale-0000',
+        ]);
+
+        $this->loginWithSubject('fixture-sub-ada-0001');
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertEquals('fixture-sub-ada-0001', $user->fresh()->oidc_sub);
+    }
+
     public function test_callback_with_user_info_unsigned()
     {
         // Create a new RSA key pair for signing the ID token

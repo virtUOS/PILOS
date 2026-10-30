@@ -6,6 +6,7 @@ namespace App\Observers;
 
 use App\Enums\RoomAuthTokenType;
 use App\Exceptions\RoomIdGenerationFailed;
+use App\Jobs\CancelRecapRegistration;
 use App\Models\Room;
 use App\Models\RoomAuthToken;
 use Illuminate\Support\Facades\DB;
@@ -59,6 +60,13 @@ class RoomObserver
      */
     public function deleting(Room $room): void
     {
+        // Cancel meeting summary registrations, meetings are deleted by the database cascade
+        $room->meetings()
+            ->where('recap', true)
+            ->whereNotNull('internal_meeting_id')
+            ->pluck('internal_meeting_id')
+            ->each(fn (string $recordId) => CancelRecapRegistration::dispatch($recordId));
+
         $room->files->each->delete();
         $room->recordings->each->delete();
         Storage::deleteDirectory($room->id);

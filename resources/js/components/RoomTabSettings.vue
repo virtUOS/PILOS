@@ -249,6 +249,20 @@ const form = computed(() => {
           label: t("rooms.settings.recordings.auto_start_recording"),
           component: RoomTabSettingsToggleSwitch,
         },
+        ...(settingsStore.getSetting("recap.enabled") &&
+        userPermissions.can("manageRecap", props.room)
+          ? [
+              {
+                setting: "recap",
+                label: t("rooms.settings.recordings.recap"),
+                component: RoomTabSettingsToggleSwitch,
+                disabled: disabled.value || !settings.value.recap_available,
+                warningMessage: settings.value.recap_available
+                  ? null
+                  : t("rooms.settings.recordings.recap_unavailable"),
+              },
+            ]
+          : []),
       ],
     },
     {

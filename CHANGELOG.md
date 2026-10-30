@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Experimental AI meeting summaries of recorded meetings via an external summary service: room setting for the room owner, meeting type and destination per room type, owner registration and cancellation on room deletion
+
 ## [v4.20.0] - 2026-11-09
 
 ### Changed

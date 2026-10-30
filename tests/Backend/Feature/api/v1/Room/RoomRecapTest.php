@@ -13,7 +13,10 @@ use App\Models\User;
 use Database\Factories\RoomFactory;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Tests\Backend\TestCase;
+use TiMacDonald\Log\LogEntry;
+use TiMacDonald\Log\LogFake;
 
 /**
  * Tests for the meeting summary (recap) room setting
@@ -147,6 +150,50 @@ class RoomRecapTest extends TestCase
             ->assertSuccessful()
             ->assertJsonPath('data.recap', false);
         $this->assertFalse($this->room->refresh()->recap);
+    }
+
+    public function test_recap_available_only_shown_to_owner()
+    {
+        $coOwner = User::factory()->create();
+        $this->room->members()->attach($coOwner, ['role' => RoomUserRole::CO_OWNER]);
+
+        $this->actingAs($coOwner)->getJson(route('api.v1.rooms.settings', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->assertJsonPath('data.recap', false)
+            ->assertJsonMissingPath('data.recap_available');
+
+        $this->actingAs($this->room->owner)->getJson(route('api.v1.rooms.settings', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->assertJsonPath('data.recap_available', true);
+    }
+
+    public function test_recap_disabled_with_invalid_meta_prefix()
+    {
+        Log::swap(new LogFake);
+
+        foreach (['Recap', 'recap-x', 'r', 'recap_x', '1recap', 'a'.str_repeat('b', 16)] as $invalidPrefix) {
+            config(['recap.meta_prefix' => $invalidPrefix]);
+
+            $this->actingAs($this->room->owner)->getJson(route('api.v1.rooms.settings', ['room' => $this->room]))
+                ->assertSuccessful()
+                ->assertJsonPath('data.recap_available', false);
+
+            $this->getJson(route('api.v1.config'))
+                ->assertSuccessful()
+                ->assertJsonPath('data.recap.enabled', false);
+        }
+
+        Log::assertLogged(fn (LogEntry $log) => $log->level === 'warning'
+            && $log->message === 'Meeting summaries disabled: RECAP_META_PREFIX must match ^[a-z][a-z0-9]{1,15}$');
+
+        // Valid prefixes (minimum and maximum length)
+        foreach (['ab', 'a'.str_repeat('b', 15), 'summary2'] as $validPrefix) {
+            config(['recap.meta_prefix' => $validPrefix]);
+
+            $this->actingAs($this->room->owner)->getJson(route('api.v1.rooms.settings', ['room' => $this->room]))
+                ->assertSuccessful()
+                ->assertJsonPath('data.recap_available', true);
+        }
     }
 
     public function test_recap_enforced_off_by_room_type()

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 #[ObservedBy([RoomObserver::class])]
@@ -407,12 +408,31 @@ class Room extends Model
     }
 
     /**
+     * Indicates whether the meeting summary (recap) feature is enabled.
+     * An invalid meta parameter prefix disables the feature, as the meta parameters would not match the exporter.
+     */
+    public static function isRecapEnabled(): bool
+    {
+        if (! config('recap.enabled')) {
+            return false;
+        }
+
+        if (preg_match('/^[a-z][a-z0-9]{1,15}$/', (string) config('recap.meta_prefix')) !== 1) {
+            Log::warning('Meeting summaries disabled: RECAP_META_PREFIX must match ^[a-z][a-z0-9]{1,15}$');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Indicates whether the meeting summary (recap) can be activated for this room.
      * Requires the feature to be enabled and the room owner to have logged in via OIDC (stored subject).
      */
     public function isRecapAvailable(): bool
     {
-        return config('recap.enabled') && ! empty($this->owner->oidc_sub);
+        return self::isRecapEnabled() && ! empty($this->owner->oidc_sub);
     }
 
     /**

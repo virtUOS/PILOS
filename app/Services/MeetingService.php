@@ -105,6 +105,15 @@ class MeetingService
         $meetingParams->addMeta('bbb-origin', 'PILOS');
         $meetingParams->addMeta('pilos-sub-spool-dir', config('recording.spool-sub-directory'));
 
+        // Opt in to a meeting summary (recap), keys defined by the recap metadata interface v1
+        if ($this->meeting->recap) {
+            $recapPrefix = config('recap.meta_prefix');
+            $meetingParams->addMeta($recapPrefix.'-v', '1');
+            $meetingParams->addMeta($recapPrefix.'-enabled', 'true');
+            $meetingParams->addMeta($recapPrefix.'-type', $this->meeting->room->roomType->recap_type);
+            $meetingParams->addMeta($recapPrefix.'-sink', $this->meeting->room->roomType->recap_sink);
+        }
+
         // get files that should be used in this meeting and add links to the files
         $files = $this->meeting->room->files()->where('use_in_meeting', true)->orderBy('default', 'desc')->get();
         foreach ($files as $file) {
@@ -175,6 +184,10 @@ class MeetingService
 
             return null;
         }
+
+        // Internal meeting id, used as record id of the recording
+        $this->meeting->internal_meeting_id = $result->getInternalMeetingId();
+        $this->meeting->save();
 
         return $result;
     }

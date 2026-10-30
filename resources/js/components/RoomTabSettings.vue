@@ -258,7 +258,7 @@ const form = computed(() => {
                 component: RoomTabSettingsToggleSwitch,
                 disabled: disabled.value || !settings.value.recap_available,
                 warningMessage: settings.value.recap_available
-                  ? null
+                  ? t("rooms.settings.recordings.recap_requires_record")
                   : t("rooms.settings.recordings.recap_unavailable"),
               },
             ]

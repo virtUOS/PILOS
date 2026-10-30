@@ -428,6 +428,7 @@ return [
             'auto_start_recording' => 'شروع خودکار ضبط',
             'recap' => 'ایجاد خلاصه جلسه (هوش مصنوعی)',
             'recap_unavailable' => 'پس از یک بار ورود از طریق OpenID Connect در دسترس است.',
+            'recap_requires_record' => 'فقط زمانی اعمال می‌شود که ضبط ویدئوکنفرانس فعال باشد.',
             'record_attendance' => 'ثبت حضور شرکت‌کنندگان',
             'record_video_conference' => 'ضبط کنفرانس ویدئویی',
             'title' => 'ضبط‌ها',

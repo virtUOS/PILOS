@@ -489,6 +489,7 @@ return [
             'auto_start_recording' => 'Automatic recording start',
             'recap' => 'Create a meeting summary (AI)',
             'recap_unavailable' => 'Available after you have logged in once via OpenID Connect.',
+            'recap_requires_record' => 'Only takes effect when the recording of the video conference is enabled.',
             'record_attendance' => 'Log attendance of participants',
             'record_video_conference' => 'Record video conference',
             'title' => 'Recordings',

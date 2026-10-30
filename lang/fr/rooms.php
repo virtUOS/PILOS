@@ -489,6 +489,7 @@ return [
             'auto_start_recording' => 'Enregistrement automatique au démarrage',
             'recap' => 'Créer un résumé de la réunion (IA)',
             'recap_unavailable' => 'Disponible après votre première connexion via OpenID Connect.',
+            'recap_requires_record' => 'Ne s\'applique que si l\'enregistrement de la visioconférence est activé.',
             'record_attendance' => 'Enregistrer l\'historique des présences',
             'record_video_conference' => 'Enregistrer la vidéo conférence',
             'title' => 'Enregistrements',

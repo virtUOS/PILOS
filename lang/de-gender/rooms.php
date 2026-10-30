@@ -434,6 +434,7 @@ return [
             'auto_start_recording' => 'Automatischer Aufnahmestart',
             'recap' => 'Zusammenfassung der Besprechung erstellen (KI)',
             'recap_unavailable' => 'Verfügbar, nachdem Sie sich einmal per OpenID Connect angemeldet haben.',
+            'recap_requires_record' => 'Wirkt nur, wenn die Aufzeichnung der Videokonferenz aktiviert ist.',
             'record_attendance' => 'Anwesenheit der Teilnehmer protokollieren',
             'record_video_conference' => 'Videokonferenz aufzeichnen',
             'title' => 'Aufzeichnungen',

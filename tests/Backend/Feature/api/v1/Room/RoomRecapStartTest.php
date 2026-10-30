@@ -15,10 +15,13 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Backend\TestCase;
 use Tests\Backend\Utils\BigBlueButtonServerFaker;
+use TiMacDonald\Log\LogEntry;
+use TiMacDonald\Log\LogFake;
 
 /**
  * Tests for the meeting summary (recap) parameters on meeting start and the cancellation on room deletion
@@ -116,7 +119,7 @@ class RoomRecapStartTest extends TestCase
         $this->assertEquals('PILOS', $createParameters['meta_bbb-origin']);
 
         $meeting = $this->room->refresh()->latestMeeting;
-        $this->assertTrue((bool) $meeting->recap);
+        $this->assertTrue($meeting->recap);
         $this->assertEquals(self::INTERNAL_MEETING_ID, $meeting->internal_meeting_id);
         $this->assertEquals($meeting->id, $createParameters['meetingID']);
 
@@ -198,7 +201,7 @@ class RoomRecapStartTest extends TestCase
         $this->assertEquals([], $this->recapMetaKeys($createParameters));
 
         $meeting = $this->room->refresh()->latestMeeting;
-        $this->assertFalse((bool) $meeting->recap);
+        $this->assertFalse($meeting->recap);
         $this->assertEquals(self::INTERNAL_MEETING_ID, $meeting->internal_meeting_id);
 
         Queue::assertNotPushed(RegisterRecapMeeting::class);
@@ -222,6 +225,26 @@ class RoomRecapStartTest extends TestCase
         Queue::assertPushed(CancelRecapRegistration::class, 2);
         Queue::assertPushed(CancelRecapRegistration::class, fn (CancelRecapRegistration $job) => $job->recordId === 'record-id-a-1695892370102');
         Queue::assertPushed(CancelRecapRegistration::class, fn (CancelRecapRegistration $job) => $job->recordId === 'record-id-b-1695892370103');
+    }
+
+    public function test_room_deletion_without_service_configuration()
+    {
+        Queue::fake();
+        Log::swap(new LogFake);
+        config(['recap.frontend_token' => null]);
+
+        Meeting::factory()->create(['room_id' => $this->room->id, 'recap' => true, 'internal_meeting_id' => 'record-id-a-1695892370102']);
+        Meeting::factory()->create(['room_id' => $this->room->id, 'recap' => true, 'internal_meeting_id' => 'record-id-b-1695892370103']);
+
+        $this->actingAs($this->room->owner)->deleteJson(route('api.v1.rooms.destroy', ['room' => $this->room]))
+            ->assertNoContent();
+
+        Queue::assertNotPushed(CancelRecapRegistration::class);
+        Log::assertLogged(fn (LogEntry $log) => $log->level === 'warning'
+            && $log->context['room'] === $this->room->id
+            && $log->context['count'] === 2);
+        Log::assertNotLogged(fn (LogEntry $log) => str_contains($log->message.json_encode($log->context), self::OWNER_SUB)
+            || str_contains($log->message.json_encode($log->context), self::OWNER_EMAIL));
     }
 
     public function test_owner_deletion_cancels_registrations()

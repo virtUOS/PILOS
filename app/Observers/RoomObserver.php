@@ -9,7 +9,9 @@ use App\Exceptions\RoomIdGenerationFailed;
 use App\Jobs\CancelRecapRegistration;
 use App\Models\Room;
 use App\Models\RoomAuthToken;
+use App\Services\RecapService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -61,11 +63,17 @@ class RoomObserver
     public function deleting(Room $room): void
     {
         // Cancel meeting summary registrations, meetings are deleted by the database cascade
-        $room->meetings()
+        $recapRecordIds = $room->meetings()
             ->where('recap', true)
             ->whereNotNull('internal_meeting_id')
-            ->pluck('internal_meeting_id')
-            ->each(fn (string $recordId) => CancelRecapRegistration::dispatch($recordId));
+            ->pluck('internal_meeting_id');
+        if ($recapRecordIds->isNotEmpty()) {
+            if (RecapService::isConfigured()) {
+                $recapRecordIds->each(fn (string $recordId) => CancelRecapRegistration::dispatch($recordId));
+            } else {
+                Log::warning('Meeting summary registrations of room {room} not cancelled; service not configured', ['room' => $room->id, 'count' => $recapRecordIds->count()]);
+            }
+        }
 
         $room->files->each->delete();
         $room->recordings->each->delete();

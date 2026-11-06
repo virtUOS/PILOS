@@ -89,10 +89,10 @@
           </div>
 
           <div
-            v-if="features.recording"
+            v-if="features.recording || features.recap"
             class="flex flex-col gap-2 rounded-border bg-surface-200 p-4 dark:bg-surface-800"
           >
-            <span class="font-semibold">{{ $t("rooms.recording_info") }}</span>
+            <span class="font-semibold">{{ $t(recordingConsentInfo) }}</span>
             <i>{{ $t("rooms.recording_hint") }}</i>
             <div class="flex items-center gap-2">
               <Checkbox
@@ -105,11 +105,11 @@
                 }"
               />
               <label for="record-agreement" class="required">{{
-                $t("rooms.recording_accept")
+                $t(recordingConsentAccept)
               }}</label>
             </div>
             <FormError :errors="formErrors.fieldError('consent_record')" />
-            <div class="flex items-center gap-2">
+            <div v-if="features.recording" class="flex items-center gap-2">
               <Checkbox
                 v-model="recordVideoAgreement"
                 input-id="record-video-agreement"
@@ -123,6 +123,7 @@
               }}</label>
             </div>
             <FormError
+              v-if="features.recording"
               :errors="formErrors.fieldError('consent_record_video')"
             />
           </div>
@@ -315,7 +316,7 @@ const autoJoin = computed(() => {
     return false;
   }
 
-  if (features.value.recording) {
+  if (features.value.recording || features.value.recap) {
     return false;
   }
 
@@ -324,6 +325,27 @@ const autoJoin = computed(() => {
   }
 
   return true;
+});
+
+/**
+ * Consent texts for the recording and the meeting summary (recap)
+ */
+const recordingConsentInfo = computed(() => {
+  if (!features.value.recap) {
+    return "rooms.recording_info";
+  }
+  return features.value.recording
+    ? "rooms.recording_recap_info"
+    : "rooms.recap_info";
+});
+
+const recordingConsentAccept = computed(() => {
+  if (!features.value.recap) {
+    return "rooms.recording_accept";
+  }
+  return features.value.recording
+    ? "rooms.recording_recap_accept"
+    : "rooms.recap_accept";
 });
 
 /**

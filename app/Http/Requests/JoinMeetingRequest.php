@@ -47,6 +47,13 @@ class JoinMeetingRequest extends FormRequest
             ];
         }
 
+        // Meeting summary without recording, the camera video is not recorded
+        if ($meeting?->recap) {
+            return [
+                'consent_record' => ['required', 'boolean', 'accepted'], // Consent to join meeting with meeting summary enabled
+            ];
+        }
+
         return [];
     }
 

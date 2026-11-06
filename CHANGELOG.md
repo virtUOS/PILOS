@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Experimental AI meeting summaries of recorded meetings via an external summary service: room setting for the room owner, meeting type and destination per room type, owner registration and cancellation on room deletion
+- Experimental AI meeting summaries via an external summary service, independent of the recording setting of the room: room setting for the room owner in its own section, meeting type and destination per room type, owner registration and cancellation on room deletion, consent texts for meetings with summary only and with recording and summary; playback recordings of meetings with summary only are not imported
 
 ## [v4.20.0] - 2026-11-09
 

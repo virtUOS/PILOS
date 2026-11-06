@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Services\RoomService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Context;
 
@@ -43,6 +44,13 @@ class StartMeetingRequest extends FormRequest
             return [
                 'consent_record' => ['required', 'boolean', 'accepted'], // Consent to join meeting with recording enabled
                 'consent_record_video' => ['required', 'boolean'], // Permission to record own video
+            ];
+        }
+
+        // Meeting summary without recording, the camera video is not recorded
+        if ((new RoomService($this->room))->isRecapActive()) {
+            return [
+                'consent_record' => ['required', 'boolean', 'accepted'], // Consent to join meeting with meeting summary enabled
             ];
         }
 

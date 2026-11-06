@@ -24,7 +24,7 @@ use TiMacDonald\Log\LogEntry;
 use TiMacDonald\Log\LogFake;
 
 /**
- * Tests for the meeting summary (recap) parameters on meeting start and the cancellation on room deletion
+ * Tests for the meeting summary (recap) parameters on meeting start and join, and the cancellation on room deletion
  */
 class RoomRecapStartTest extends TestCase
 {
@@ -169,7 +169,6 @@ class RoomRecapStartTest extends TestCase
             'invalid meta prefix' => ['invalid_meta_prefix'],
             'room setting off' => ['room_setting_off'],
             'room setting enforced off by room type' => ['enforced_off'],
-            'recording off' => ['record_off'],
             'owner without OIDC subject' => ['owner_without_sub'],
             'room type without meeting type' => ['no_recap_type'],
             'room type without sink' => ['no_recap_sink'],
@@ -190,7 +189,6 @@ class RoomRecapStartTest extends TestCase
             'invalid_meta_prefix' => config(['recap.meta_prefix' => 'Recap']),
             'room_setting_off' => $this->room->forceFill(['recap' => false])->save(),
             'enforced_off' => $this->room->roomType->forceFill(['recap_default' => false, 'recap_enforced' => true])->save(),
-            'record_off' => $this->room->forceFill(['record' => false])->save(),
             'owner_without_sub' => $this->room->owner->forceFill(['oidc_sub' => null])->save(),
             'no_recap_type' => $this->room->roomType->forceFill(['recap_type' => null])->save(),
             'no_recap_sink' => $this->room->roomType->forceFill(['recap_sink' => null])->save(),
@@ -205,6 +203,157 @@ class RoomRecapStartTest extends TestCase
         $this->assertEquals(self::INTERNAL_MEETING_ID, $meeting->internal_meeting_id);
 
         Queue::assertNotPushed(RegisterRecapMeeting::class);
+    }
+
+    public static function createParameterProvider(): array
+    {
+        $cases = [];
+        foreach ([true, false] as $recap) {
+            foreach ([true, false] as $record) {
+                foreach ([true, false] as $autoStart) {
+                    $label = ($recap ? 'summary on' : 'summary off').', '.($record ? 'recording on' : 'recording off').', '.($autoStart ? 'auto start on' : 'auto start off');
+                    $cases[$label] = [$recap, $record, $autoStart];
+                }
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * BBB records the meeting if the room asks for a recording or a meeting summary,
+     * the automatic recording start always follows the room
+     */
+    #[DataProvider('createParameterProvider')]
+    public function test_start_record_parameters(bool $recap, bool $record, bool $autoStart)
+    {
+        Queue::fake();
+        $this->room->forceFill(['recap' => $recap, 'record' => $record, 'auto_start_recording' => $autoStart])->save();
+
+        $createParameters = $this->startRoom();
+
+        $this->assertEquals($recap || $record ? 'true' : 'false', $createParameters['record']);
+        $this->assertEquals($autoStart ? 'true' : 'false', $createParameters['autoStartRecording']);
+        $this->assertEqualsCanonicalizing($recap ? self::RECAP_META_KEYS : [], $this->recapMetaKeys($createParameters));
+
+        // The meeting keeps the recording setting of the room
+        $meeting = $this->room->refresh()->latestMeeting;
+        $this->assertSame($record, $meeting->record);
+        $this->assertSame($recap, $meeting->recap);
+    }
+
+    /**
+     * Fake response of the BBB getMeetingInfo call for a running meeting
+     */
+    private function addRunningMeetingInfoRequest(): void
+    {
+        $this->bbbFaker->addRequest(fn (Request $request) => Http::response('
+            <response>
+                <returncode>SUCCESS</returncode>
+                <meetingName>test</meetingName>
+                <meetingID>'.$this->room->latestMeeting->id.'</meetingID>
+                <internalMeetingID>'.self::INTERNAL_MEETING_ID.'</internalMeetingID>
+                <running>true</running>
+                <hasUserJoined>true</hasUserJoined>
+                <recording>false</recording>
+                <hasBeenForciblyEnded>false</hasBeenForciblyEnded>
+                <participantCount>0</participantCount>
+                <listenerCount>0</listenerCount>
+                <voiceParticipantCount>0</voiceParticipantCount>
+                <videoCount>0</videoCount>
+                <moderatorCount>0</moderatorCount>
+                <isBreakout>false</isBreakout>
+            </response>'));
+    }
+
+    /**
+     * Summary-only meeting: consent is required on start and join, camera video is never recorded
+     */
+    public function test_start_and_join_summary_only()
+    {
+        Queue::fake();
+        $this->room->forceFill(['record' => false])->save();
+
+        // Start requirements and consent
+        $this->actingAs($this->room->owner)->optionsJson(route('api.v1.rooms.start-requirements', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->assertJsonPath('data.features.recording', false)
+            ->assertJsonPath('data.features.recap', true);
+
+        $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.start', ['room' => $this->room]), ['consent_record' => false])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['consent_record'])
+            ->assertJsonMissingValidationErrors(['consent_record_video']);
+
+        $this->bbbFaker->addCreateMeetingRequest();
+        $joinUrl = $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.start', ['room' => $this->room]), ['consent_record' => true, 'consent_record_video' => true])
+            ->assertSuccessful()
+            ->json('url');
+        $this->assertStringContainsString('userdata-bbb_record_video=false', $joinUrl);
+
+        // Join requirements and consent
+        $this->room->refresh();
+        $this->actingAs($this->room->owner)->optionsJson(route('api.v1.rooms.join-requirements', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->assertJsonPath('data.features.recording', false)
+            ->assertJsonPath('data.features.recap', true);
+
+        $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['consent_record'])
+            ->assertJsonMissingValidationErrors(['consent_record_video']);
+
+        $this->addRunningMeetingInfoRequest();
+        $joinUrl = $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]), ['consent_record' => true, 'consent_record_video' => true])
+            ->assertSuccessful()
+            ->json('url');
+        $this->assertStringContainsString('userdata-bbb_record_video=false', $joinUrl);
+    }
+
+    /**
+     * Meeting with recording and summary: the consent to record the own video is asked as for a recording
+     */
+    public function test_join_recording_and_summary()
+    {
+        Queue::fake();
+
+        $this->startRoom();
+        $this->room->refresh();
+
+        $this->actingAs($this->room->owner)->optionsJson(route('api.v1.rooms.join-requirements', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->assertJsonPath('data.features.recording', true)
+            ->assertJsonPath('data.features.recap', true);
+
+        $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['consent_record', 'consent_record_video']);
+
+        $this->addRunningMeetingInfoRequest();
+        $joinUrl = $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]), ['consent_record' => true, 'consent_record_video' => true])
+            ->assertSuccessful()
+            ->json('url');
+        $this->assertStringContainsString('userdata-bbb_record_video=true', $joinUrl);
+    }
+
+    /**
+     * Without recording and summary no consent is needed and the video parameter is not passed
+     */
+    public function test_start_without_recording_and_summary()
+    {
+        Queue::fake();
+        $this->room->forceFill(['record' => false, 'recap' => false])->save();
+
+        $this->actingAs($this->room->owner)->optionsJson(route('api.v1.rooms.start-requirements', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->assertJsonPath('data.features.recording', false)
+            ->assertJsonPath('data.features.recap', false);
+
+        $this->bbbFaker->addCreateMeetingRequest();
+        $joinUrl = $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.start', ['room' => $this->room]))
+            ->assertSuccessful()
+            ->json('url');
+        $this->assertStringNotContainsString('userdata-bbb_record_video', $joinUrl);
     }
 
     public function test_room_deletion_cancels_registrations()

@@ -84,8 +84,9 @@ class MeetingService
         }
 
         // Room settings take precedence
+        // A meeting summary needs the recording marks of BBB, so the meeting is recorded even if the room setting is off
         $meetingParams
-            ->setRecord($this->meeting->record)
+            ->setRecord($this->meeting->recap ? true : $this->meeting->record)
             ->setAutoStartRecording($this->meeting->room->auto_start_recording)
             ->setLogoutURL(url('rooms/'.$this->meeting->room->id))
             ->setMeetingEndedURL($this->getCallbackUrl())
@@ -696,6 +697,9 @@ class MeetingService
         // If meeting has recording enabled, add parameter to allow recording of own video
         if ($this->meeting->record) {
             $joinMeetingParams->addUserData('bbb_record_video', $request->consent_record_video);
+        } elseif ($this->meeting->recap) {
+            // Meeting summary without recording, camera video is never recorded
+            $joinMeetingParams->addUserData('bbb_record_video', false);
         }
 
         // If a custom style file is set, pass url to bbb html5 client

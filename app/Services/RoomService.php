@@ -138,14 +138,13 @@ class RoomService
     /**
      * Indicates whether a new meeting of this room should create a meeting summary (recap).
      *
-     * Requires the feature, an owner with OIDC subject, the effective room settings recap and record,
-     * and a meeting type and sink on the room type.
+     * Requires the feature, an owner with OIDC subject, the effective room setting recap,
+     * and a meeting type and sink on the room type. The recording setting of the room is not required.
      */
-    protected function isRecapActive(): bool
+    public function isRecapActive(): bool
     {
         return $this->room->isRecapAvailable()
             && $this->room->getRoomSetting('recap')
-            && $this->room->getRoomSetting('record')
             && ! empty($this->room->roomType->recap_type)
             && ! empty($this->room->roomType->recap_sink);
     }

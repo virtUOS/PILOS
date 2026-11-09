@@ -112,9 +112,16 @@ abstract class ExternalUser
 
         foreach ($requiredAttributes as $attribute) {
             if ($this->getFirstAttributeValue($attribute) == null) {
-                Log::error('Required attribute missing', ['attribute' => $attribute, 'attributes' => $this->getAttributes()]);
-
-                throw new MissingAttributeException($attribute);
+                if ($attribute === 'first_name') {
+                    // Use a placeholder for "first_name" if it is missing
+                    $this->addAttributeValue('first_name', '🤖');
+                } else {
+                    Log::error('Required attribute missing', [
+                        'attribute' => $attribute,
+                        'attributes' => $this->getAttributes(),
+                    ]);
+                    throw new MissingAttributeException($attribute);
+                }
             }
         }
     }

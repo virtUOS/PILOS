@@ -41,9 +41,6 @@ export function useRoomTypeSettings() {
             options: {
               0: t("app.disabled"),
               1: t("app.enabled"),
-              2: t(
-                "rooms.settings.video_conference.lobby.only_for_guests_enabled",
-              ),
             },
           },
         ],

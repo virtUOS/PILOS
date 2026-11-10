@@ -64,6 +64,38 @@ class RecapService
     }
 
     /**
+     * Get the registration of a meeting, including the result of its job
+     *
+     * @throws ConnectionException
+     */
+    public function getRegistration(string $recordId): Response
+    {
+        return $this->getHttpClient()->get('api/v1/registrations/'.rawurlencode($recordId));
+    }
+
+    /**
+     * Get the summary text (Markdown) that the service holds for pickup
+     *
+     * @throws ConnectionException
+     */
+    public function getSummary(string $recordId): Response
+    {
+        return $this->getHttpClient()
+            ->accept('text/markdown')
+            ->get('api/v1/registrations/'.rawurlencode($recordId).'/summary');
+    }
+
+    /**
+     * Confirm the pickup of the summary text, the service then deletes it
+     *
+     * @throws ConnectionException
+     */
+    public function confirmSummary(string $recordId): Response
+    {
+        return $this->getHttpClient()->delete('api/v1/registrations/'.rawurlencode($recordId).'/summary');
+    }
+
+    /**
      * Indicates whether a failed request should be retried (rate limit or server error)
      */
     public static function isRetryable(Response $response): bool

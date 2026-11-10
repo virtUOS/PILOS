@@ -10,6 +10,7 @@ use App\Http\Controllers\api\v1\auth\ResetPasswordController;
 use App\Http\Controllers\api\v1\auth\VerificationController;
 use App\Http\Controllers\api\v1\LocaleController;
 use App\Http\Controllers\api\v1\MeetingController;
+use App\Http\Controllers\api\v1\MeetingSummaryController;
 use App\Http\Controllers\api\v1\PermissionController;
 use App\Http\Controllers\api\v1\RecordingController;
 use App\Http\Controllers\api\v1\RoleController;
@@ -112,6 +113,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::delete('rooms/{room}/recordings/{recording}', [RecordingController::class, 'destroy'])->name('rooms.recordings.destroy');
             });
 
+            // Meeting summary operations
+            Route::middleware('can:manageMeetingSummaries,room')->group(function () {
+                Route::put('rooms/{room}/meetingSummaries/{meetingSummary}', [MeetingSummaryController::class, 'update'])->name('rooms.meetingSummaries.update');
+                Route::delete('rooms/{room}/meetingSummaries/{meetingSummary}', [MeetingSummaryController::class, 'destroy'])->name('rooms.meetingSummaries.destroy');
+            });
+
             // Streaming operations
             Route::middleware('can:viewStreaming,room')->group(function () {
                 Route::get('rooms/{room}/streaming/config', [RoomStreamingController::class, 'getConfig'])->name('rooms.streaming.config.get');
@@ -192,6 +199,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('rooms/{room}/join', [RoomController::class, 'join'])->name('rooms.join');
             Route::get('rooms/{room}/files', [RoomFileController::class, 'index'])->name('rooms.files.get');
             Route::get('rooms/{room}/recordings', [RecordingController::class, 'index'])->name('rooms.recordings.index');
+            Route::get('rooms/{room}/meetingSummaries', [MeetingSummaryController::class, 'index'])->name('rooms.meetingSummaries.index');
+            Route::get('rooms/{room}/meetingSummaries/{meetingSummary}', [MeetingSummaryController::class, 'show'])->name('rooms.meetingSummaries.show');
 
         });
 

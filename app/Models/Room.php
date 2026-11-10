@@ -182,6 +182,16 @@ class Room extends Model
     }
 
     /**
+     * Meeting summaries (results of the meeting summary service)
+     *
+     * @return HasMany
+     */
+    public function meetingSummaries()
+    {
+        return $this->hasMany(MeetingSummary::class)->chaperone();
+    }
+
+    /**
      * Room owner
      *
      * @return BelongsTo

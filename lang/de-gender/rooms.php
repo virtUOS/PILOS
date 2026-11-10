@@ -203,6 +203,39 @@ return [
     'meeting_history' => [
         'title' => 'Historie',
     ],
+    'meeting_summaries' => [
+        'delete' => 'Besprechungszusammenfassung löschen',
+        'delete_aria' => 'Besprechungszusammenfassung vom :date löschen',
+        'document_hint' => 'Das Dokument liegt im Docs-Konto der Person, der der Raum gehört. Sie können es nur öffnen, wenn diese Person es in Docs für Sie freigegeben hat.',
+        'edit' => 'Zugriffsrecht ändern',
+        'edit_aria' => 'Zugriffsrecht der Besprechungszusammenfassung vom :date ändern',
+        'filter_aria' => 'Besprechungszusammenfassungen filtern',
+        'gone' => 'Die Besprechungszusammenfassung ist nicht mehr verfügbar.',
+        'modals' => [
+            'delete' => [
+                'confirm' => 'Soll die Besprechungszusammenfassung unwiderruflich gelöscht werden?',
+                'title' => 'Besprechungszusammenfassung löschen',
+            ],
+            'edit' => [
+                'title' => 'Zugriffsrecht der Besprechungszusammenfassung ändern',
+            ],
+        ],
+        'nodata' => 'Keine Besprechungszusammenfassungen vorhanden',
+        'open_document' => 'Dokument öffnen',
+        'open_document_aria' => 'Dokument der Besprechungszusammenfassung vom :date in einem neuen Tab öffnen',
+        'reload_aria' => 'Besprechungszusammenfassungen neu laden',
+        'retention_period' => [
+            'days' => 'Die Besprechungszusammenfassungen werden für :days Tage gespeichert.',
+            'title' => 'Aufbewahrungsdauer',
+            'unlimited' => 'Die Besprechungszusammenfassungen werden unbegrenzt gespeichert.',
+        ],
+        'sort_ascending' => 'Besprechungszusammenfassungen aufsteigend sortieren',
+        'sort_descending' => 'Besprechungszusammenfassungen absteigend sortieren',
+        'title' => 'Besprechungszusammenfassungen',
+        'view' => 'Besprechungszusammenfassung anzeigen',
+        'view_aria' => 'Besprechungszusammenfassung vom :date anzeigen',
+        'view_title' => 'Besprechungszusammenfassung vom :date',
+    ],
     'members' => [
         'add_single_user' => 'Einen Benutzer hinzufügen',
         'add_user' => 'Benutzer hinzufügen',

@@ -143,6 +143,7 @@ import RoomTabFiles from "./RoomTabFiles.vue";
 import RoomTabHistory from "./RoomTabHistory.vue";
 import RoomTabSettings from "./RoomTabSettings.vue";
 import RoomTabRecordings from "./RoomTabRecordings.vue";
+import RoomTabMeetingSummaries from "./RoomTabMeetingSummaries.vue";
 import { onRoomHasChanged } from "../composables/useRoomHelpers.js";
 import { useUrlSearchParams } from "@vueuse/core";
 import { useSettingsStore } from "../stores/settings.js";
@@ -264,6 +265,19 @@ const availableTabs = computed(() => {
     icon: "fa-solid fa-play-circle",
     component: RoomTabRecordings,
   });
+
+  // Meeting summaries: shown if the room has summaries or the feature is enabled
+  if (
+    props.room.has_meeting_summaries ||
+    settingsStore.getSetting("recap.enabled")
+  ) {
+    tabs.push({
+      key: "meeting_summaries",
+      label: t("rooms.meeting_summaries.title"),
+      icon: "fa-solid fa-file-pen",
+      component: RoomTabMeetingSummaries,
+    });
+  }
 
   if (userPermissions.can("viewSettings", props.room)) {
     tabs.push({

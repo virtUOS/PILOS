@@ -116,6 +116,27 @@ Customize the texts as described in [Locales](../09-customisation/02-locales.md)
 'recap_info' => 'The audio of this meeting may be transcribed and summarized by an AI service of the university. No recording is published.',
 ```
 
+## Meeting summaries tab
+
+After a meeting with a meeting summary ends, PILOS asks the summary service for the result in a queued job (`GET /api/v1/registrations/{internal meeting id}`).
+It polls 2, 5, 10 and 30 minutes apart, then hourly, and stops when the result is stored, the registration is not found (404) or cancelled, the job failed or was not delivered, or 24 hours after the meeting end.
+Network errors, HTTP 429 and HTTP 5xx count as "not yet" and are polled again on the same schedule; other client errors fail the job.
+
+The result is stored as one meeting summary per meeting and listed in the room tab **Meeting summaries**, newest first.
+The tab is shown when meeting summaries are enabled or the room already has summaries.
+Depending on the destination configured at the summary service, an entry is one of:
+
+- **Link to a document**, for example in La Suite Docs. The document is created in the Docs account of the room owner at meeting start, and only people the owner shares it with in Docs can open it.
+  Other room members see the entry, but the link only works for them after the owner has shared the document. The tab shows this hint next to the link.
+- **Summary text** (destination type `frontend` at the summary service). PILOS fetches the text (`GET …/summary`), stores it, and then confirms the pickup (`DELETE …/summary`), so the summary service deletes its copy.
+  The text is shown read-only in the room, as plain text that is never interpreted as HTML. Texts larger than 2 MiB or not encoded in UTF-8 are not stored; the pickup is still confirmed.
+
+Access works like for recordings:
+
+- Each summary has an access setting (everyone with access to the room, participants, moderators, or owner and co-owners). New summaries start with owner and co-owners only.
+- The room owner, co-owners and users with the permission to manage all rooms can change the access and delete a summary. Users with the permission to view all rooms see all summaries.
+- Summaries are deleted after the [recording retention period](./03-recording.md#max-retention-period) (application settings) by the `cleanup:recordings` command, with the room, or by the owner or a co-owner.
+
 ## Data flow and privacy
 
 | Data                                                                      | Sent to                                       | Personal data                                  |
@@ -123,11 +144,15 @@ Customize the texts as described in [Locales](../09-customisation/02-locales.md)
 | `meta_<prefix>-*` parameters (version, opt-in, meeting type, destination) | BigBlueButton, part of the recording metadata | none; may be visible to meeting participants   |
 | Registration: meeting ID, internal meeting ID, owner `sub` and email      | summary service                               | owner OpenID Connect subject and email address |
 | Cancellation on room deletion: internal meeting ID                        | summary service                               | none                                           |
+| Result polling: internal meeting ID                                       | summary service                               | none                                           |
+| Result: document link or summary text                                     | from the summary service to PILOS             | summary text: names and meeting content        |
 
 - PILOS stores the OpenID Connect subject in the users table, and the meeting summary flag and the internal meeting ID in the meetings table. They are deleted with the user or the meeting.
 - PILOS does not store the playback recording of a meeting with a summary but without recording; it deletes the spool file on import.
 - The queued jobs contain only model IDs or the internal meeting ID, no subject or email.
 - Logs contain only meeting and internal meeting IDs, HTTP status codes and problem types, never the subject, email or token.
+- The summary text is stored in the PILOS database (`meeting_summaries` table), visible according to its access setting, and deleted after the recording retention period, with the room, or by the owner or a co-owner. The document link points to the owner's document; deleting the entry in PILOS does not delete the document.
+- The summary text is never written to the logs; logs contain the meeting and summary IDs and the text size only.
 - How long the summary service keeps the registration, recording and summary is configured there.
 
 ## Retries

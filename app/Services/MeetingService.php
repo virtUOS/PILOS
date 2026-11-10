@@ -9,6 +9,7 @@ use App\Enums\RoomUserRole;
 use App\Events\RoomEnded;
 use App\Http\Requests\JoinMeetingRequest;
 use App\Http\Requests\StartMeetingRequest;
+use App\Jobs\PollMeetingSummary;
 use App\Models\Meeting;
 use App\Models\MeetingAttendee;
 use App\Models\User;
@@ -517,6 +518,11 @@ class MeetingService
         $this->meeting->save();
 
         RoomEnded::dispatch($this->meeting->room);
+
+        // Poll the meeting summary service for the result of this meeting
+        if ($this->meeting->recap && ! empty($this->meeting->internal_meeting_id) && RecapService::isConfigured()) {
+            PollMeetingSummary::dispatchAfterEnd($this->meeting);
+        }
 
         // set end time of the attendance to the end time of the meeting
         // for all users that have been present to the end

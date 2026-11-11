@@ -265,6 +265,8 @@ class PollMeetingSummaryTest extends TestCase
         // The pickup is still confirmed, so the service deletes the text
         Http::assertSent(fn (Request $request) => $request->method() === 'DELETE' && $request->url() === self::SUMMARY_URL);
         Log::assertLogged(fn (LogEntry $log) => $log->level === 'warning' && $log->context['bytes'] === PollMeetingSummary::MAX_SUMMARY_BYTES + 1);
+        // One log line for the rejected text
+        Log::assertNotLogged(fn (LogEntry $log) => str_contains($log->message, 'delivered without'));
     }
 
     public function test_summary_at_size_limit_is_stored()
@@ -300,6 +302,9 @@ class PollMeetingSummaryTest extends TestCase
         $job->assertNotFailed();
         $job->assertNotReleased();
         $this->assertSame(0, MeetingSummary::count());
+        // One log line for the rejected link
+        Log::assertLogged(fn (LogEntry $log) => $log->level === 'warning' && str_contains($log->message, 'document link'));
+        Log::assertNotLogged(fn (LogEntry $log) => str_contains($log->message, 'delivered without'));
     }
 
     public function test_stored_result_is_not_duplicated()
@@ -502,6 +507,7 @@ class PollMeetingSummaryTest extends TestCase
         $job->assertNotFailed();
         $job->assertNotReleased();
         $this->assertSame(0, MeetingSummary::count());
+        Log::assertLogged(fn (LogEntry $log) => $log->level === 'notice' && str_contains($log->message, 'delivered without'));
     }
 
     public function test_skip_without_service_configuration()

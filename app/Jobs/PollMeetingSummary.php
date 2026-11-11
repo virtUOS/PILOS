@@ -192,6 +192,7 @@ class PollMeetingSummary implements ShouldBeUnique, ShouldQueue
 
         if ($meetingSummary === null) {
             $content = null;
+            $contentReceived = false;
             if ($summaryAvailable) {
                 try {
                     $summaryResponse = $recapService->getSummary($recordId);
@@ -202,6 +203,7 @@ class PollMeetingSummary implements ShouldBeUnique, ShouldQueue
                 }
 
                 if ($summaryResponse->successful()) {
+                    $contentReceived = true;
                     $content = $this->acceptedContent($summaryResponse->body());
                 } elseif (! $summaryResponse->notFound()) {
                     $this->handleErrorResponse($summaryResponse, 'summary');
@@ -210,10 +212,14 @@ class PollMeetingSummary implements ShouldBeUnique, ShouldQueue
                 }
             }
 
+            $documentUrlReceived = ($job['document_url'] ?? null) !== null;
             $documentUrl = $this->acceptedDocumentUrl($job['document_url'] ?? null);
 
             if ($documentUrl === null && $content === null) {
-                Log::notice('Meeting summary of meeting {meeting} delivered without a document link or summary text', ['meeting' => $this->meeting->id]);
+                // A rejected text or link was already logged as a warning
+                if (! $contentReceived && ! $documentUrlReceived) {
+                    Log::notice('Meeting summary of meeting {meeting} delivered without a document link or summary text', ['meeting' => $this->meeting->id]);
+                }
             } else {
                 $meetingSummary = new MeetingSummary;
                 $meetingSummary->room_id = $this->meeting->room_id;

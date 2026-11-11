@@ -48,6 +48,7 @@ return [
         'bbb_style' => 'Fichier de styles CSS',
         'city' => 'Ville',
         'color' => 'Couleur',
+        'consent_recap' => 'Consentement à la transcription et au résumé du son par une IA',
         'consent_record' => 'Consentement à l\'enregistrement de la vidéo conférence',
         'consent_record_attendance' => 'Consentement à la sauvegarde des présences',
         'consent_record_video' => 'Consentement à enregistrer sa propre vidéo',
@@ -203,6 +204,9 @@ return [
                 'regex' => 'La classe CSS de l\'icône doit être au format suivant: `fa-solid fa-camera`.',
             ],
             'required' => 'Les paramètres de la bannière de message sont manquants!',
+        ],
+        'consent_recap' => [
+            'accepted' => 'Le consentement à la transcription et au résumé du son par une IA est requis pour continuer.',
         ],
         'consent_record' => [
             'accepted' => 'Le consentement d\'enregistrement de la vidéo conférence est requis pour continuer.',

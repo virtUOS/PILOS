@@ -48,13 +48,55 @@ class JoinMeetingRequest extends FormRequest
         }
 
         // Meeting summary without recording, the camera video is not recorded
-        if ($meeting?->recap) {
+        if ($this->isSummaryOnly()) {
             return [
                 'consent_record' => ['required', 'boolean', 'accepted'], // Consent to join meeting with meeting summary enabled
             ];
         }
 
         return [];
+    }
+
+    /**
+     * Custom messages for the meeting summary consent, which shares the field with the recording consent
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        if ($this->isSummaryOnly()) {
+            return [
+                'consent_record.accepted' => __('validation.custom.consent_recap.accepted'),
+            ];
+        }
+
+        return [];
+    }
+
+    /**
+     * Custom attribute names for the meeting summary consent, which shares the field with the recording consent
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        if ($this->isSummaryOnly()) {
+            return [
+                'consent_record' => __('validation.attributes.consent_recap'),
+            ];
+        }
+
+        return [];
+    }
+
+    /**
+     * Whether the meeting creates a meeting summary without a recording
+     */
+    private function isSummaryOnly(): bool
+    {
+        $meeting = $this->room->latestMeeting;
+
+        return ! $meeting?->record && (bool) $meeting?->recap;
     }
 
     private function getStreamingRules(): array

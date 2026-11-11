@@ -48,6 +48,7 @@ return [
         'bbb_style' => 'CSS style file',
         'city' => 'City',
         'color' => 'Color',
+        'consent_recap' => 'Consent to the transcription and AI summary of the audio',
         'consent_record' => 'Consent to the recording of the video conference',
         'consent_record_attendance' => 'Consent to attendance logging',
         'consent_record_video' => 'Consent to record own video',
@@ -203,6 +204,9 @@ return [
                 'regex' => 'The icon css class should be in the following format: `fa-solid fa-camera`.',
             ],
             'required' => 'The message banner settings are missing!',
+        ],
+        'consent_recap' => [
+            'accepted' => 'Consent to the transcription and AI summary of the audio must be given.',
         ],
         'consent_record' => [
             'accepted' => 'Consent to the recording of the video conference must be given.',

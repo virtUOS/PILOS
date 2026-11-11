@@ -129,7 +129,7 @@ Depending on the destination configured at the summary service, an entry is one 
 - **Link to a document**, for example in La Suite Docs. The document is created in the Docs account of the room owner at meeting start, and only people the owner shares it with in Docs can open it.
   Other room members see the entry, but the link only works for them after the owner has shared the document. The tab shows this hint next to the link.
 - **Summary text** (destination type `frontend` at the summary service). PILOS fetches the text (`GET …/summary`), stores it, and then confirms the pickup (`DELETE …/summary`), so the summary service deletes its copy.
-  The text is shown read-only in the room, as plain text that is never interpreted as HTML. Texts larger than 2 MiB or not encoded in UTF-8 are not stored; the pickup is still confirmed.
+  The text is shown read-only in the room, with the Markdown rendered and sanitized: headings, lists, emphasis, code, quotes, tables and links are kept; images, embedded HTML, styles and scripts are removed, and links open in a new tab. Texts larger than 2 MiB or not encoded in UTF-8 are not stored; the pickup is still confirmed.
 
 Access works like for recordings:
 

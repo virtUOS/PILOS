@@ -226,6 +226,7 @@ return [
         'delete' => 'Besprechungszusammenfassung löschen',
         'delete_aria' => 'Besprechungszusammenfassung vom :date löschen',
         'document_hint' => 'Das Dokument liegt im Docs-Konto des Raumbesitzers. Sie können es nur öffnen, wenn der Raumbesitzer es in Docs für Sie freigegeben hat.',
+        'document_hint_owner' => 'Das Dokument öffnet sich in Ihrem Docs-Konto. Andere können es nur öffnen, wenn Sie es in Docs für sie freigeben.',
         'edit' => 'Zugriffsrecht ändern',
         'edit_aria' => 'Zugriffsrecht der Besprechungszusammenfassung vom :date ändern',
         'filter_aria' => 'Besprechungszusammenfassungen filtern',

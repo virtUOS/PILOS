@@ -118,7 +118,11 @@
                       v-if="item.type === 'document'"
                       class="text-muted-color"
                       data-test="room-meeting-summary-document-hint"
-                      >{{ $t("rooms.meeting_summaries.document_hint") }}</small
+                      >{{
+                        isOwner
+                          ? $t("rooms.meeting_summaries.document_hint_owner")
+                          : $t("rooms.meeting_summaries.document_hint")
+                      }}</small
                     >
                   </div>
                 </div>
@@ -214,6 +218,7 @@ import { computed, onMounted, ref } from "vue";
 import { useApi } from "../composables/useApi.js";
 import { useUserPermissions } from "../composables/useUserPermission.js";
 import { useSettingsStore } from "../stores/settings.js";
+import { useAuthStore } from "../stores/auth";
 import { usePaginator } from "../composables/usePaginator.js";
 import { useDateDiff } from "../composables/useDateDiff.js";
 import { useI18n } from "vue-i18n";
@@ -250,6 +255,7 @@ const emit = defineEmits([
 const api = useApi();
 const userPermissions = useUserPermissions();
 const settingsStore = useSettingsStore();
+const authStore = useAuthStore();
 const paginator = usePaginator();
 const dateDiff = useDateDiff();
 const { t } = useI18n();
@@ -260,6 +266,13 @@ const loadingError = ref(false);
 const summaries = ref([]);
 const sortOrder = ref(0);
 const filter = ref("all");
+
+const isOwner = computed(() => {
+  return (
+    authStore.currentUser != null &&
+    authStore.currentUser.id === props.room.owner?.id
+  );
+});
 
 const retentionPeriod = computed(() =>
   settingsStore.getSetting("recording.recording_retention_period"),

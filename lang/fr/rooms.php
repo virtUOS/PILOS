@@ -226,6 +226,7 @@ return [
         'delete' => 'Supprimer le résumé de réunion',
         'delete_aria' => 'Supprimer le résumé de la réunion du :date',
         'document_hint' => 'Le document se trouve dans le compte Docs du propriétaire de la salle. Vous ne pouvez l\'ouvrir que si le propriétaire l\'a partagé avec vous dans Docs.',
+        'document_hint_owner' => 'Le document s\'ouvre dans votre compte Docs. Les autres personnes ne peuvent l\'ouvrir que si vous le partagez avec elles dans Docs.',
         'edit' => 'Modifier l\'accès',
         'edit_aria' => 'Modifier l\'accès au résumé de la réunion du :date',
         'filter_aria' => 'Filtrer les résumés de réunion',

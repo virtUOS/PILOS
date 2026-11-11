@@ -127,15 +127,18 @@ The tab is shown when meeting summaries are enabled or the room already has summ
 Depending on the destination configured at the summary service, an entry is one of:
 
 - **Link to a document**, for example in La Suite Docs. The document is created in the Docs account of the room owner at meeting start, and only people the owner shares it with in Docs can open it.
-  Other room members see the entry, but the link only works for them after the owner has shared the document. The tab shows this hint next to the link.
+  Other room members see the entry, but the link only works for them after the owner has shared the document. The tab shows this hint next to the link; the owner sees a hint that the document opens in their own Docs account.
 - **Summary text** (destination type `frontend` at the summary service). PILOS fetches the text (`GET …/summary`), stores it, and then confirms the pickup (`DELETE …/summary`), so the summary service deletes its copy.
   The text is shown read-only in the room, with the Markdown rendered and sanitized: headings, lists, emphasis, code, quotes, tables and links are kept; images, embedded HTML, styles and scripts are removed, and links open in a new tab. Texts larger than 2 MiB or not encoded in UTF-8 are not stored; the pickup is still confirmed.
+
+PILOS stores the first result of a meeting and then stops polling. If an administrator reruns the processing at the summary service after that, the new result is not transferred to PILOS and the stored meeting summary is not updated.
 
 Access works like for recordings:
 
 - Each summary has an access setting (everyone with access to the room, participants, moderators, or owner and co-owners). New summaries start with owner and co-owners only.
 - The room owner, co-owners and users with the permission to manage all rooms can change the access and delete a summary. Users with the permission to view all rooms see all summaries.
 - Summaries are deleted after the [recording retention period](./03-recording.md#max-retention-period) (application settings) by the `cleanup:recordings` command, with the room, or by the owner or a co-owner.
+  A summary is also deleted together with its meeting record in the meeting history, even before the retention period ends.
 
 ## Data flow and privacy
 

@@ -48,6 +48,7 @@ return [
         'bbb_style' => 'فایل سبک CSS',
         'city' => 'شهر',
         'color' => 'رنگ',
+        'consent_recap' => 'رضایت به رونویسی و خلاصه‌سازی صدا توسط هوش مصنوعی',
         'consent_record' => 'رضایت به ضبط کنفرانس ویدیویی',
         'consent_record_attendance' => 'رضایت به ثبت حضور',
         'consent_record_video' => 'رضایت به ضبط ویدیوی شخصی',
@@ -203,6 +204,9 @@ return [
                 'regex' => 'کلاس CSS آیکون باید به این فرمت باشد: `fa-solid fa-camera`.',
             ],
             'required' => 'تنظیمات بنر پیام وجود ندارد!',
+        ],
+        'consent_recap' => [
+            'accepted' => 'رضایت به رونویسی و خلاصه‌سازی صدا توسط هوش مصنوعی الزامی است.',
         ],
         'consent_record' => [
             'accepted' => 'رضایت به ضبط کنفرانس ویدیویی الزامی است.',

@@ -282,7 +282,7 @@ class RoomRecapStartTest extends TestCase
 
         $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.start', ['room' => $this->room]), ['consent_record' => false])
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['consent_record'])
+            ->assertJsonValidationErrors(['consent_record' => __('validation.custom.consent_recap.accepted')])
             ->assertJsonMissingValidationErrors(['consent_record_video']);
 
         $this->bbbFaker->addCreateMeetingRequest();
@@ -300,8 +300,12 @@ class RoomRecapStartTest extends TestCase
 
         $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]))
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['consent_record'])
+            ->assertJsonValidationErrors(['consent_record' => __('validation.required', ['attribute' => __('validation.attributes.consent_recap')])])
             ->assertJsonMissingValidationErrors(['consent_record_video']);
+
+        $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]), ['consent_record' => false])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['consent_record' => __('validation.custom.consent_recap.accepted')]);
 
         $this->addRunningMeetingInfoRequest();
         $joinUrl = $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]), ['consent_record' => true, 'consent_record_video' => true])
@@ -327,7 +331,14 @@ class RoomRecapStartTest extends TestCase
 
         $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]))
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['consent_record', 'consent_record_video']);
+            ->assertJsonValidationErrors([
+                'consent_record' => __('validation.required', ['attribute' => __('validation.attributes.consent_record')]),
+                'consent_record_video',
+            ]);
+
+        $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]), ['consent_record' => false, 'consent_record_video' => false])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['consent_record' => __('validation.custom.consent_record.accepted')]);
 
         $this->addRunningMeetingInfoRequest();
         $joinUrl = $this->actingAs($this->room->owner)->postJson(route('api.v1.rooms.join', ['room' => $this->room]), ['consent_record' => true, 'consent_record_video' => true])

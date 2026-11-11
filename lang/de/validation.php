@@ -48,6 +48,7 @@ return [
         'bbb_style' => 'CSS Style Datei',
         'city' => 'Stadt',
         'color' => 'Farbe',
+        'consent_recap' => 'Zustimmung zur Transkription und KI-Zusammenfassung des Tons',
         'consent_record' => 'Zustimmung zur Aufzeichnung der Videokonferenz',
         'consent_record_attendance' => 'Zustimmung zur Anwesenheitserfassung',
         'consent_record_video' => 'Zustimmung zur Aufzeichnung eigener Videos',
@@ -203,6 +204,9 @@ return [
                 'regex' => 'Die Icon CSS-Klasse muss folgendem Format entsprechen: `fa-solid fa-door-open`.',
             ],
             'required' => 'Die Einstellungen für den Banner für Mitteilungen fehlen!',
+        ],
+        'consent_recap' => [
+            'accepted' => 'Die Zustimmung zur Transkription und KI-Zusammenfassung des Tons muss erteilt werden.',
         ],
         'consent_record' => [
             'accepted' => 'Die Zustimmung zur Aufzeichnung der Videokonferenz muss erteilt werden.',

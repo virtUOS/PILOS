@@ -53,6 +53,10 @@
     "record_enforced": false,
     "auto_start_recording_default": false,
     "auto_start_recording_enforced": false,
+    "recap_default": false,
+    "recap_enforced": false,
+    "recap_type": null,
+    "recap_sink": null,
     "has_access_code_default": true,
     "has_access_code_enforced": false
   }

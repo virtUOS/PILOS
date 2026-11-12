@@ -72,6 +72,15 @@ export function useRoomTypeSettings() {
                 },
               ]
             : []),
+          ...(settingsStore.getSetting("recap.enabled")
+            ? [
+                {
+                  key: "recap",
+                  label: t("rooms.settings.recordings.recap"),
+                  type: "switch",
+                },
+              ]
+            : []),
         ],
       },
       {

@@ -47,6 +47,9 @@ export const ROOM_SETTINGS_DEFINITION = {
   auto_start_recording: {
     expert_setting: true,
   },
+  recap: {
+    expert_setting: false,
+  },
   visibility: {
     expert_setting: true,
   },

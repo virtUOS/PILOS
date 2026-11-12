@@ -129,7 +129,7 @@ Depending on the destination configured at the summary service, an entry is one 
 - **Link to a document**, for example in La Suite Docs. The document is created in the Docs account of the room owner at meeting start, and only people the owner shares it with in Docs can open it.
   Other room members see the entry, but the link only works for them after the owner has shared the document. The tab shows this hint next to the link; the owner sees a hint that the document opens in their own Docs account.
 - **Summary text** (destination type `frontend` at the summary service). PILOS fetches the text (`GET …/summary`), stores it, and then confirms the pickup (`DELETE …/summary`), so the summary service deletes its copy.
-  The text is shown read-only in the room, with the Markdown rendered and sanitized: headings, lists, emphasis, code, quotes, tables and links are kept; images, embedded HTML, styles and scripts are removed, and links open in a new tab. Texts larger than 2 MiB or not encoded in UTF-8 are not stored; the pickup is still confirmed.
+  The text is available in the room as a Markdown file download (`meeting-summary-<room id>-<date and time>.md`); it is not displayed in the page. To read or edit a formatted summary, use a document destination such as La Suite Docs. Texts larger than 2 MiB or not encoded in UTF-8 are not stored; the pickup is still confirmed.
 
 PILOS stores the first result of a meeting and then stops polling. If an administrator reruns the processing at the summary service after that, the new result is not transferred to PILOS and the stored meeting summary is not updated.
 
@@ -154,7 +154,7 @@ Access works like for recordings:
 - PILOS does not store the playback recording of a meeting with a summary but without recording; it deletes the spool file on import.
 - The queued jobs contain only model IDs or the internal meeting ID, no subject or email.
 - Logs contain only meeting and internal meeting IDs, HTTP status codes and problem types, never the subject, email or token.
-- The summary text is stored in the PILOS database (`meeting_summaries` table), visible according to its access setting, and deleted after the recording retention period, with the room, or by the owner or a co-owner. The document link points to the owner's document; deleting the entry in PILOS does not delete the document.
+- The summary text is stored in the PILOS database (`meeting_summaries` table), available for download according to its access setting, and deleted after the recording retention period, with the room, or by the owner or a co-owner. The document link points to the owner's document; deleting the entry in PILOS does not delete the document.
 - The summary text is never written to the logs; logs contain the meeting and summary IDs and the text size only.
 - How long the summary service keeps the registration, recording and summary is configured there.
 

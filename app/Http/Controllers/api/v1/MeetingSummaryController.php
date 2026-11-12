@@ -17,6 +17,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class MeetingSummaryController extends Controller
 {
@@ -72,11 +73,27 @@ class MeetingSummaryController extends Controller
         return MeetingSummaryResource::collection($resource->paginate($generalSettings->pagination_page_size))->additional($additional);
     }
 
-    public function show(Room $room, MeetingSummary $meetingSummary): MeetingSummaryResource
+    /**
+     * Download the summary text as a Markdown file; only for summaries stored in PILOS (not for document links)
+     */
+    public function download(Room $room, MeetingSummary $meetingSummary, GeneralSettings $generalSettings): Response
     {
         $this->authorize('viewMeetingSummary', [$room, $meetingSummary]);
 
-        return (new MeetingSummaryResource($meetingSummary))->withContent();
+        if ($meetingSummary->content === null) {
+            abort(404);
+        }
+
+        // ASCII file name from the room ID and the local start time, e.g. meeting-summary-abc-def-123-2026-11-12-0930.md
+        $timezone = Auth::user()?->timezone ?? $generalSettings->default_timezone;
+        $start = $meetingSummary->start->copy()->setTimezone($timezone)->format('Y-m-d-Hi');
+        $filename = preg_replace('/[^A-Za-z0-9_-]/', '-', 'meeting-summary-'.$room->id.'-'.$start).'.md';
+
+        return response($meetingSummary->content, 200, [
+            'Content-Type' => 'text/markdown; charset=utf-8',
+            'Content-Disposition' => HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $filename),
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function update(UpdateMeetingSummaryRequest $request, Room $room, MeetingSummary $meetingSummary): MeetingSummaryResource

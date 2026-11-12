@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Experimental AI meeting summaries via an external summary service, independent of the recording setting of the room: room setting for the room owner in its own section, meeting type and destination per room type, owner registration and cancellation on room deletion, consent texts for meetings with summary only and with recording and summary; playback recordings of meetings with summary only are not imported
-- Meeting summaries tab in the room: PILOS polls the summary service after a meeting with summary ends and lists the result per meeting, either as a link to the document in the owner's account (opens only for people the owner shares it with) or as the summary text shown read-only; access per summary like recordings (default owner and co-owners, changed or deleted by owner and co-owners), deleted after the recording retention period and with the room
+- Meeting summaries tab in the room: PILOS polls the summary service after a meeting with summary ends and lists the result per meeting, either as a link to the document in the owner's account (opens only for people the owner shares it with) or as the summary text available as a Markdown file download; access per summary like recordings (default owner and co-owners, changed or deleted by owner and co-owners), deleted after the recording retention period and with the room
 
 ## [v4.20.0] - 2026-11-09
 

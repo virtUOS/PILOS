@@ -227,6 +227,8 @@ return [
         'delete_aria' => 'Delete meeting summary of :date',
         'document_hint' => 'The document is stored in the Docs account of the room owner. You can only open it if the owner has shared it with you in Docs.',
         'document_hint_owner' => 'The document opens in your Docs account. Other people can only open it if you share it with them in Docs.',
+        'download' => 'Download meeting summary',
+        'download_aria' => 'Download the meeting summary of :date as a Markdown file',
         'edit' => 'Change access',
         'edit_aria' => 'Change access to the meeting summary of :date',
         'filter_aria' => 'Filter meeting summaries',
@@ -252,9 +254,6 @@ return [
         'sort_ascending' => 'Sort meeting summaries ascending',
         'sort_descending' => 'Sort meeting summaries descending',
         'title' => 'Meeting summaries',
-        'view' => 'Show meeting summary',
-        'view_aria' => 'Show the meeting summary of :date',
-        'view_title' => 'Meeting summary of :date',
     ],
     'members' => [
         'add_single_user' => 'Add single user',

@@ -146,8 +146,8 @@
                     data-test="room-meeting-summaries-open-document-button"
                   />
 
-                  <!-- Summary text shown in the room -->
-                  <RoomTabMeetingSummariesViewButton
+                  <!-- Summary text stored in the room, as a Markdown file -->
+                  <RoomTabMeetingSummariesDownloadButton
                     v-else
                     :room-id="props.room.id"
                     :summary-id="item.id"
@@ -231,7 +231,7 @@ import {
   HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_UNAUTHORIZED,
 } from "../constants/httpStatusCodes.js";
-import RoomTabMeetingSummariesViewButton from "./RoomTabMeetingSummariesViewButton.vue";
+import RoomTabMeetingSummariesDownloadButton from "./RoomTabMeetingSummariesDownloadButton.vue";
 import RoomTabMeetingSummariesEditButton from "./RoomTabMeetingSummariesEditButton.vue";
 import RoomTabMeetingSummariesDeleteButton from "./RoomTabMeetingSummariesDeleteButton.vue";
 

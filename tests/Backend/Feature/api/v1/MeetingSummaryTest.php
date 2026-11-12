@@ -19,7 +19,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Backend\TestCase;
 
 /**
- * Meeting summary tests (list, view, change access, delete)
+ * Meeting summary tests (list, download, change access, delete)
  */
 class MeetingSummaryTest extends TestCase
 {
@@ -120,21 +120,67 @@ class MeetingSummaryTest extends TestCase
      * @param  list<string>  $visible
      */
     #[DataProvider('visibilityProvider')]
-    public function test_show_access(string $user, array $visible)
+    public function test_download_access(string $user, array $visible)
     {
         $this->actAs($user);
 
         foreach ($this->summaries as $name => $summary) {
-            $response = $this->getJson(route('api.v1.rooms.meetingSummaries.show', ['room' => $this->room, 'meetingSummary' => $summary]));
+            $response = $this->get(route('api.v1.rooms.meetingSummaries.download', ['room' => $this->room, 'meetingSummary' => $summary]));
             if (in_array($name, $visible)) {
-                $response->assertOk()
-                    ->assertJsonPath('data.id', $summary->id)
-                    ->assertJsonPath('data.content', $summary->content)
-                    ->assertJsonPath('data.type', 'content');
+                $response->assertOk();
+                $this->assertSame($summary->content, $response->getContent());
             } else {
                 $response->assertForbidden();
             }
         }
+    }
+
+    /**
+     * Summary of the given room, visible to everyone, started 2026-11-12 08:30 UTC
+     */
+    private function createDownloadSummary(Room $room): MeetingSummary
+    {
+        return MeetingSummary::factory()->create([
+            'meeting_id' => Meeting::factory()->create(['room_id' => $room->id])->id,
+            'access' => RecordingAccess::EVERYONE,
+            'start' => '2026-11-12 08:30:00',
+            'content' => "# Summary\n\n- Ada Testperson: täglich <b>prüfen</b>\n",
+        ]);
+    }
+
+    public function test_download_response()
+    {
+        $room = Room::factory()->create(['id' => 'abc-def-123', 'allow_guests' => true, 'access_code' => null]);
+        $summary = $this->createDownloadSummary($room);
+
+        // File name date in the timezone of the user
+        $room->owner->update(['timezone' => 'Europe/Berlin']);
+        $response = $this->actingAs($room->owner)
+            ->get(route('api.v1.rooms.meetingSummaries.download', ['room' => $room, 'meetingSummary' => $summary]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/markdown; charset=utf-8')
+            ->assertHeader('Content-Disposition', 'attachment; filename=meeting-summary-abc-def-123-2026-11-12-0930.md')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertSame("# Summary\n\n- Ada Testperson: täglich <b>prüfen</b>\n", $response->getContent());
+
+        // Guests get the default timezone of the application
+        Auth::logout();
+        $this->generalSettings->default_timezone = 'America/New_York';
+        $this->generalSettings->save();
+        $this->get(route('api.v1.rooms.meetingSummaries.download', ['room' => $room, 'meetingSummary' => $summary]))
+            ->assertOk()
+            ->assertHeader('Content-Disposition', 'attachment; filename=meeting-summary-abc-def-123-2026-11-12-0330.md');
+    }
+
+    public function test_download_file_name_is_safe()
+    {
+        $room = Room::factory()->create(['id' => 'a"b c;ü\\d', 'allow_guests' => true, 'access_code' => null]);
+        $summary = $this->createDownloadSummary($room);
+
+        $this->actingAs($room->owner)
+            ->get(route('api.v1.rooms.meetingSummaries.download', ['room' => $room, 'meetingSummary' => $summary]))
+            ->assertOk()
+            ->assertHeader('Content-Disposition', 'attachment; filename=meeting-summary-a-b-c----d-2026-11-12-0830.md');
     }
 
     public function test_view_all_permission()
@@ -148,7 +194,7 @@ class MeetingSummaryTest extends TestCase
             ->assertOk()
             ->assertJsonCount(4, 'data');
 
-        $this->getJson(route('api.v1.rooms.meetingSummaries.show', ['room' => $this->room, 'meetingSummary' => $this->summaries['owner']]))
+        $this->get(route('api.v1.rooms.meetingSummaries.download', ['room' => $this->room, 'meetingSummary' => $this->summaries['owner']]))
             ->assertOk();
     }
 
@@ -188,20 +234,25 @@ class MeetingSummaryTest extends TestCase
             'access' => RecordingAccess::EVERYONE,
         ]);
 
-        $this->getJson(route('api.v1.rooms.meetingSummaries.show', ['room' => $this->room, 'meetingSummary' => $summary]))
-            ->assertOk()
-            ->assertJsonPath('data.type', 'document')
-            ->assertJsonPath('data.document_url', $summary->document_url)
-            ->assertJsonPath('data.content', null);
+        $response = $this->getJson(route('api.v1.rooms.meetingSummaries.index', ['room' => $this->room]))
+            ->assertOk();
+        $item = collect($response->json('data'))->firstWhere('id', $summary->id);
+        $this->assertSame('document', $item['type']);
+        $this->assertSame($summary->document_url, $item['document_url']);
+
+        // Nothing to download for a document link
+        $this->get(route('api.v1.rooms.meetingSummaries.download', ['room' => $this->room, 'meetingSummary' => $summary]))
+            ->assertNotFound();
     }
 
-    public function test_show_summary_of_other_room()
+    public function test_download_summary_of_other_room()
     {
         $otherSummary = MeetingSummary::factory()->create(['access' => RecordingAccess::EVERYONE]);
 
         $this->actingAs($this->room->owner)
-            ->getJson(route('api.v1.rooms.meetingSummaries.show', ['room' => $this->room, 'meetingSummary' => $otherSummary]))
-            ->assertNotFound();
+            ->getJson(route('api.v1.rooms.meetingSummaries.download', ['room' => $this->room, 'meetingSummary' => $otherSummary]))
+            ->assertNotFound()
+            ->assertJson(['message' => 'model_not_found', 'model' => 'meeting_summary']);
     }
 
     /**

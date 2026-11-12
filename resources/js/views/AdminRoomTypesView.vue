@@ -790,6 +790,106 @@
             </div>
           </div>
 
+          <template v-if="settingsStore.getSetting('recap.enabled')">
+            <!-- Meeting summary (recap), can only be enforced off -->
+            <div class="field grid grid-cols-12 gap-4" data-test="recap-field">
+              <label
+                for="recap-default"
+                class="col-span-12 items-center md:col-span-4 md:mb-0"
+                >{{ $t("rooms.settings.recordings.recap") }}</label
+              >
+              <div class="col-span-12 md:col-span-8">
+                <div class="flex items-center justify-between">
+                  <ToggleSwitch
+                    v-model="model.recap_default"
+                    input-id="recap-default"
+                    :invalid="formErrors.fieldInvalid('recap_default')"
+                    :disabled="isBusy || modelLoadingError || viewOnly"
+                  />
+                  <ToggleButton
+                    v-model="model.recap_enforced"
+                    :invalid="formErrors.fieldInvalid('recap_enforced')"
+                    :disabled="isBusy || modelLoadingError || viewOnly"
+                    :on-label="
+                      $t('admin.room_types.default_room_settings.enforced')
+                    "
+                    :off-label="
+                      $t('admin.room_types.default_room_settings.default')
+                    "
+                    on-icon="fa-solid fa-lock"
+                    off-icon="fa-solid fa-lock-open"
+                    data-test="recap-enforced"
+                    :aria-label="$t('rooms.settings.general.enforced_setting')"
+                  />
+                </div>
+                <small class="block">
+                  {{ $t("admin.room_types.recap.enforced_hint") }}
+                </small>
+                <div class="flex justify-between gap-6">
+                  <FormError :errors="formErrors.fieldError('recap_default')" />
+                  <FormError
+                    class="text-right"
+                    :errors="formErrors.fieldError('recap_enforced')"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Meeting type of the summary -->
+            <div
+              class="field grid grid-cols-12 gap-4"
+              data-test="recap-type-field"
+            >
+              <label
+                for="recap-type"
+                class="col-span-12 md:col-span-4 md:mb-0"
+                >{{ $t("admin.room_types.recap.type") }}</label
+              >
+              <div class="col-span-12 md:col-span-8">
+                <InputText
+                  id="recap-type"
+                  v-model="model.recap_type"
+                  class="w-full"
+                  type="text"
+                  aria-describedby="recap-type-help"
+                  :invalid="formErrors.fieldInvalid('recap_type')"
+                  :disabled="isBusy || modelLoadingError || viewOnly"
+                />
+                <small id="recap-type-help" class="block">
+                  {{ $t("admin.room_types.recap.type_description") }}
+                </small>
+                <FormError :errors="formErrors.fieldError('recap_type')" />
+              </div>
+            </div>
+
+            <!-- Destination (sink) of the summary -->
+            <div
+              class="field grid grid-cols-12 gap-4"
+              data-test="recap-sink-field"
+            >
+              <label
+                for="recap-sink"
+                class="col-span-12 md:col-span-4 md:mb-0"
+                >{{ $t("admin.room_types.recap.sink") }}</label
+              >
+              <div class="col-span-12 md:col-span-8">
+                <InputText
+                  id="recap-sink"
+                  v-model="model.recap_sink"
+                  class="w-full"
+                  type="text"
+                  aria-describedby="recap-sink-help"
+                  :invalid="formErrors.fieldInvalid('recap_sink')"
+                  :disabled="isBusy || modelLoadingError || viewOnly"
+                />
+                <small id="recap-sink-help" class="block">
+                  {{ $t("admin.room_types.recap.sink_description") }}
+                </small>
+                <FormError :errors="formErrors.fieldError('recap_sink')" />
+              </div>
+            </div>
+          </template>
+
           <!-- Restriction settings -->
           <h4 class="text-lg font-medium">
             {{ $t("rooms.settings.restrictions.title") }}
@@ -1547,6 +1647,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "primevue/confirmdialog";
 import { useColors } from "../composables/useColors.js";
+import { useSettingsStore } from "../stores/settings";
 import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_STALE_MODEL,
@@ -1559,6 +1660,7 @@ const api = useApi();
 const router = useRouter();
 const confirm = useConfirm();
 const colors = useColors();
+const settingsStore = useSettingsStore();
 const breadcrumbLabelData = inject("breadcrumbLabelData");
 
 const { t } = useI18n();
@@ -1617,6 +1719,10 @@ const model = ref({
   record_enforced: false,
   auto_start_recording_default: false,
   auto_start_recording_enforced: false,
+  recap_default: false,
+  recap_enforced: false,
+  recap_type: null,
+  recap_sink: null,
   visibility_default: 0,
   visibility_enforced: false,
   has_access_code_default: true,

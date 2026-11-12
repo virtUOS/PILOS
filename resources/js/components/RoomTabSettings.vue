@@ -257,6 +257,25 @@ const form = computed(() => {
         },
       ],
     },
+    ...(settingsStore.getSetting("recap.enabled") &&
+    userPermissions.can("manageRecap", props.room)
+      ? [
+          {
+            title: t("rooms.settings.recap.title"),
+            items: [
+              {
+                setting: "recap",
+                label: t("rooms.settings.recordings.recap"),
+                component: RoomTabSettingsToggleSwitch,
+                disabled: disabled.value || !settings.value.recap_available,
+                warningMessage: settings.value.recap_available
+                  ? null
+                  : t("rooms.settings.recordings.recap_unavailable"),
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: t("rooms.settings.restrictions.title"),
       items: [

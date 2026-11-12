@@ -89,6 +89,17 @@ export default {
   },
 
   /**
+   * Is user allowed to change the meeting summary (recap) setting of this room
+   * Only the room owner can opt in, as the summary is delivered to the owner
+   * @param user
+   * @param model
+   * @return {boolean}
+   */
+  manageRecap(user, model) {
+    return !user ? false : model.owner?.id === user.id;
+  },
+
+  /**
    * Is user allowed to become member of this room
    * @param user
    * @param model

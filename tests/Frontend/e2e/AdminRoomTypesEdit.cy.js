@@ -1183,6 +1183,106 @@ describe("Admin room types edit", function () {
     cy.url().should("not.include", "/edit");
   });
 
+  it("edit room type meeting summary settings", function () {
+    cy.fixture("config.json").then((config) => {
+      config.data.general.base_url = Cypress.config("baseUrl");
+      config.data.recap = { enabled: true };
+
+      cy.intercept("GET", "api/v1/config", {
+        statusCode: 200,
+        body: config,
+      });
+    });
+
+    cy.fixture("roomType.json").then((roomType) => {
+      roomType.data.recap_default = false;
+      roomType.data.recap_enforced = false;
+      roomType.data.recap_type = null;
+      roomType.data.recap_sink = null;
+
+      cy.intercept("GET", "api/v1/roomTypes/3", {
+        statusCode: 200,
+        body: roomType,
+      }).as("roomTypeRequest");
+
+      cy.visit("/admin/room_types/3/edit");
+      cy.wait("@roomTypeRequest");
+      cy.wait("@serverPoolsRequest");
+
+      cy.get('[data-test="recap-field"]')
+        .should("include.text", "rooms.settings.recordings.recap")
+        .and("include.text", "admin.room_types.recap.enforced_hint")
+        .within(() => {
+          cy.get("#recap-default").should("not.be.checked").click();
+          cy.get('[data-test="recap-enforced"]').should(
+            "have.attr",
+            "aria-pressed",
+            "false",
+          );
+        });
+
+      cy.get('[data-test="recap-type-field"]')
+        .should("include.text", "admin.room_types.recap.type")
+        .and("include.text", "admin.room_types.recap.type_description")
+        .find("#recap-type")
+        .should("have.value", "")
+        .type("meeting-summary");
+
+      cy.get('[data-test="recap-sink-field"]')
+        .should("include.text", "admin.room_types.recap.sink")
+        .and("include.text", "admin.room_types.recap.sink_description")
+        .find("#recap-sink")
+        .should("have.value", "")
+        .type("docs");
+
+      cy.intercept("PUT", "api/v1/roomTypes/3", {
+        statusCode: 422,
+        body: {
+          message: "The given data was invalid.",
+          errors: {
+            recap_sink: ["The Summary destination format is invalid."],
+          },
+        },
+      }).as("saveChangesRequest");
+
+      cy.get('[data-test="room-types-save-button"]').click();
+
+      cy.wait("@saveChangesRequest").then((interception) => {
+        expect(interception.request.body).to.include({
+          recap_default: true,
+          recap_enforced: false,
+          recap_type: "meeting-summary",
+          recap_sink: "docs",
+        });
+      });
+
+      cy.get('[data-test="recap-sink-field"]').should(
+        "include.text",
+        "The Summary destination format is invalid.",
+      );
+      cy.get(".p-toast-message")
+        .should("include.text", "The given data was invalid.")
+        .find("button")
+        .click();
+    });
+
+    // Fields are hidden while the feature is disabled
+    cy.fixture("config.json").then((config) => {
+      config.data.general.base_url = Cypress.config("baseUrl");
+
+      cy.intercept("GET", "api/v1/config", {
+        statusCode: 200,
+        body: config,
+      });
+    });
+    cy.visit("/admin/room_types/3/edit");
+    cy.wait("@roomTypeRequest");
+    cy.get("#room-type-name").should("be.visible");
+    cy.get('[data-test="recap-field"]').should("not.exist");
+    cy.get('[data-test="recap-type-field"]').should("not.exist");
+    cy.get('[data-test="recap-sink-field"]').should("not.exist");
+  });
+
   it("edit room type errors", function () {
     cy.fixture("roomType.json").then((roomType) => {
       roomType.data.restrict = true;

@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option in room file management to set system-wide default presentation as start presentation ([#2662], [#2746])
 - Keyboard and focus support for the user avatar cropper to improve accessibility ([#3386])
 - Option to enforce light or dark color mode ([#3557])
+- Experimental AI meeting summaries using an external summary service, opted in by the room owner and configured per room type
+- Meeting summaries tab in rooms to open, download, change access to and delete the summaries of past meetings
 
 ### Changed
 

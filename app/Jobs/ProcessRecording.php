@@ -7,6 +7,7 @@ namespace App\Jobs;
 use App\Enums\RecordingAccess;
 use App\Exceptions\RecordingExtractionFailed;
 use App\Exceptions\UnsafeArchiveEntryException;
+use App\Models\Meeting;
 use App\Models\RecordingFormat;
 use DateTime;
 use Exception;
@@ -179,6 +180,9 @@ class ProcessRecording implements ShouldBeUnique, ShouldQueue
                 return str_ends_with($file, 'metadata.xml');
             });
 
+            // Meetings with a meeting summary but without recording, their recordings are discarded
+            $summaryOnlyMeetingIds = [];
+
             foreach ($metadataFiles as $metadataFile) {
                 // Each directory with a metadata file inside is a recording format
                 // the metadata file is describing the recording
@@ -186,6 +190,14 @@ class ProcessRecording implements ShouldBeUnique, ShouldQueue
 
                 $xmlContent = Storage::disk('recordings')->get($metadataFile);
                 $xml = simplexml_load_string($xmlContent);
+
+                // BBB only records the meeting for the meeting summary, nobody asked for a recording
+                $meeting = Meeting::find((string) $xml->meta->meetingId);
+                if ($meeting?->recap && ! $meeting->record) {
+                    $summaryOnlyMeetingIds[$meeting->id] = true;
+
+                    continue;
+                }
 
                 // Create or update the recording format in the database
                 $recordingFormat = RecordingFormat::createFromRecordingXML($xml);
@@ -208,6 +220,10 @@ class ProcessRecording implements ShouldBeUnique, ShouldQueue
 
                     return;
                 }
+            }
+
+            foreach (array_keys($summaryOnlyMeetingIds) as $meetingId) {
+                Log::info('Discarded recording of meeting {meeting}; the meeting only has a meeting summary, not a recording', ['meeting' => $meetingId]);
             }
         } catch (Exception $e) {
             // Extraction failed, retry the job later (.tar file might be incomplete yet)

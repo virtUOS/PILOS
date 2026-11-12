@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\RecordingAccess;
+use App\Models\MeetingSummary;
 use App\Models\RecordingFormat;
 use App\Models\Room;
 use App\Models\RoomFile;
@@ -128,6 +129,15 @@ class RoomPolicy
     public function update(User $user, Room $room)
     {
         return $room->owner->is($user) || $room->isCoOwner($user) || $user->can('rooms.manage');
+    }
+
+    /**
+     * Determine whether the user can change the meeting summary (recap) setting of the room.
+     * Only the room owner can opt in, as the summary is delivered to the owner.
+     */
+    public function manageRecap(User $user, Room $room): bool
+    {
+        return $room->owner->is($user);
     }
 
     /**
@@ -261,6 +271,39 @@ class RoomPolicy
         }
 
         return false;
+    }
+
+    /**
+     * Determine whether the user can see all meeting summaries of the room, regardless of their access setting
+     */
+    public function viewAllMeetingSummaries(User $user, Room $room): bool
+    {
+        return $user->can('manageMeetingSummaries', $room) || $user->can('rooms.viewAll');
+    }
+
+    /**
+     * Determine whether the user can change the access of and delete meeting summaries
+     */
+    public function manageMeetingSummaries(User $user, Room $room): bool
+    {
+        return $room->owner->is($user) || $room->isCoOwner($user) || $user->can('rooms.manage');
+    }
+
+    /**
+     * Determine whether the user can view a meeting summary, based on its access setting
+     */
+    public function viewMeetingSummary(?User $user, Room $room, MeetingSummary $meetingSummary): bool
+    {
+        if ($user && $user->can('viewAllMeetingSummaries', $room)) {
+            return true;
+        }
+
+        return match ($meetingSummary->access) {
+            RecordingAccess::EVERYONE => true,
+            RecordingAccess::PARTICIPANT => $room->isMember($user),
+            RecordingAccess::MODERATOR => $room->isModerator($user),
+            default => false,
+        };
     }
 
     public function viewStreaming(User $user, Room $room)

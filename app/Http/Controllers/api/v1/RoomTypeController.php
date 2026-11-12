@@ -112,6 +112,9 @@ class RoomTypeController extends Controller
         $roomType->has_access_code_default = $request->has_access_code_default;
         $roomType->has_access_code_enforced = $request->has_access_code_enforced;
 
+        $roomType->recap_type = $request->recap_type;
+        $roomType->recap_sink = $request->recap_sink;
+
         $roomType->save();
 
         if ($roomType->restrict) {
@@ -147,6 +150,9 @@ class RoomTypeController extends Controller
 
         $roomType->has_access_code_default = $request->has_access_code_default;
         $roomType->has_access_code_enforced = $request->has_access_code_enforced;
+
+        $roomType->recap_type = $request->recap_type;
+        $roomType->recap_sink = $request->recap_sink;
 
         $roomType->save();
 

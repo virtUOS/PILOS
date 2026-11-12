@@ -227,6 +227,8 @@ return [
         'delete_aria' => 'Supprimer le résumé de la réunion du :date',
         'document_hint' => 'Le document se trouve dans le compte Docs du propriétaire de la salle. Vous ne pouvez l\'ouvrir que si le propriétaire l\'a partagé avec vous dans Docs.',
         'document_hint_owner' => 'Le document s\'ouvre dans votre compte Docs. Les autres personnes ne peuvent l\'ouvrir que si vous le partagez avec elles dans Docs.',
+        'download' => 'Télécharger le résumé de réunion',
+        'download_aria' => 'Télécharger le résumé de la réunion du :date en fichier Markdown',
         'edit' => 'Modifier l\'accès',
         'edit_aria' => 'Modifier l\'accès au résumé de la réunion du :date',
         'filter_aria' => 'Filtrer les résumés de réunion',
@@ -252,9 +254,6 @@ return [
         'sort_ascending' => 'Trier les résumés de réunion par ordre croissant',
         'sort_descending' => 'Trier les résumés de réunion par ordre décroissant',
         'title' => 'Résumés de réunion',
-        'view' => 'Afficher le résumé de réunion',
-        'view_aria' => 'Afficher le résumé de la réunion du :date',
-        'view_title' => 'Résumé de la réunion du :date',
     ],
     'members' => [
         'add_single_user' => 'Ajouter un utilisateur unique',

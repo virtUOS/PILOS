@@ -200,7 +200,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('rooms/{room}/files', [RoomFileController::class, 'index'])->name('rooms.files.get');
             Route::get('rooms/{room}/recordings', [RecordingController::class, 'index'])->name('rooms.recordings.index');
             Route::get('rooms/{room}/meetingSummaries', [MeetingSummaryController::class, 'index'])->name('rooms.meetingSummaries.index');
-            Route::get('rooms/{room}/meetingSummaries/{meetingSummary}', [MeetingSummaryController::class, 'show'])->name('rooms.meetingSummaries.show');
+            Route::get('rooms/{room}/meetingSummaries/{meetingSummary}/download', [MeetingSummaryController::class, 'download'])->name('rooms.meetingSummaries.download');
 
         });
 

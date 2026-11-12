@@ -10,23 +10,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class MeetingSummaryResource extends JsonResource
 {
     /**
-     * Include the summary text
-     */
-    private bool $withContent = false;
-
-    /**
-     * Sets the flag to also include the summary text.
-     *
-     * @return $this
-     */
-    public function withContent(): static
-    {
-        $this->withContent = true;
-
-        return $this;
-    }
-
-    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -42,7 +25,6 @@ class MeetingSummaryResource extends JsonResource
             'access' => $this->access,
             'type' => $this->document_url !== null ? 'document' : 'content',
             'document_url' => $this->document_url,
-            'content' => $this->when($this->withContent, fn () => $this->content),
         ];
     }
 }

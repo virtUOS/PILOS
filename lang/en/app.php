@@ -118,6 +118,7 @@ return [
     'loading' => 'Loading',
     'model' => [
         'meeting' => 'Meeting',
+        'meeting_summary' => 'Meeting summary',
         'recording' => 'Recording',
         'recording_format' => 'Recording format',
         'role' => 'Role',

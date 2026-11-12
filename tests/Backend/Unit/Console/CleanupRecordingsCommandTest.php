@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Backend\Unit\Console;
 
 use App\Enums\TimePeriod;
+use App\Models\MeetingSummary;
 use App\Models\Recording;
 use App\Models\RecordingFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,5 +71,29 @@ class CleanupRecordingsCommandTest extends TestCase
         // Check storage
         $this->assertDirectoryDoesNotExist(Storage::disk('recordings')->path($recording1->id));
         $this->assertDirectoryExists(Storage::disk('recordings')->path($recording2->id));
+    }
+
+    public function test_meeting_summaries_follow_retention_period()
+    {
+        $summary1 = MeetingSummary::factory()->create(['start' => now()->subDays(10)]);
+        $summary2 = MeetingSummary::factory()->document()->create(['start' => now()->subDays(7)]);
+
+        // Unlimited retention period keeps all summaries
+        $this->recordingSettings->recording_retention_period = TimePeriod::UNLIMITED;
+        $this->recordingSettings->save();
+
+        $this->artisan('cleanup:recordings');
+
+        $this->assertModelExists($summary1);
+        $this->assertModelExists($summary2);
+
+        // Set the retention period to a week
+        $this->recordingSettings->recording_retention_period = TimePeriod::ONE_WEEK;
+        $this->recordingSettings->save();
+
+        $this->artisan('cleanup:recordings');
+
+        $this->assertModelMissing($summary1);
+        $this->assertModelExists($summary2);
     }
 }

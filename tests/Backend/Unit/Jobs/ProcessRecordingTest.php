@@ -322,4 +322,76 @@ class ProcessRecordingTest extends TestCase
         $this->assertTrue(Storage::disk('recordings')->directoryExists(self::INTERNAL_MEETING_ID));
         $this->assertFileExists(Storage::disk('recordings')->path(self::INTERNAL_MEETING_ID.'/notes/notes.pdf'));
     }
+
+    /**
+     * The recording of a meeting with a meeting summary but without recording is discarded
+     */
+    public function test_summary_only_meeting_is_discarded()
+    {
+        Storage::fake('recordings');
+        Storage::fake('recordings-spool');
+
+        Meeting::factory()->create([
+            'id' => self::EXTERNAL_MEETING_ID,
+            'record' => false,
+            'recap' => true,
+        ]);
+
+        Log::swap(new LogFake);
+        Queue::fake();
+
+        copy(base_path('tests/Backend/Fixtures/Recordings/multiple.tar'), Storage::disk('recordings-spool')->path('multiple.tar'));
+
+        $job = (new ProcessRecording('multiple.tar'))->withFakeQueueInteractions();
+
+        $job->handle();
+
+        $job->assertNotFailed();
+
+        // Nothing stored or shown
+        $this->assertDatabaseCount('recordings', 0);
+        $this->assertDatabaseCount('recording_formats', 0);
+        $this->assertCount(0, Storage::disk('recordings')->allFiles());
+        $this->assertFalse(Storage::disk('recordings')->directoryExists(self::INTERNAL_MEETING_ID));
+
+        // Spool file removed as after a successful import
+        $this->assertCount(0, Storage::disk('recordings-spool')->allFiles());
+
+        // One log line with the meeting ID only
+        Log::assertLoggedTimes(fn (LogEntry $log) => str_starts_with($log->message, 'Discarded recording of meeting'), 1);
+        Log::assertLogged(fn (LogEntry $log) => str_starts_with($log->message, 'Discarded recording of meeting')
+            && $log->level === 'info'
+            && $log->context === ['meeting' => self::EXTERNAL_MEETING_ID]);
+        Log::assertNotLogged(fn (LogEntry $log) => str_contains($log->message.json_encode($log->context), self::TITLE));
+    }
+
+    /**
+     * The recording of a meeting with recording and meeting summary is imported as before
+     */
+    public function test_recording_with_summary_is_imported()
+    {
+        Storage::fake('recordings');
+        Storage::fake('recordings-spool');
+
+        $meeting = Meeting::factory()->create([
+            'id' => self::EXTERNAL_MEETING_ID,
+            'record' => true,
+            'recap' => true,
+        ]);
+
+        Log::swap(new LogFake);
+        Queue::fake();
+
+        copy(base_path('tests/Backend/Fixtures/Recordings/multiple.tar'), Storage::disk('recordings-spool')->path('multiple.tar'));
+
+        $job = (new ProcessRecording('multiple.tar'))->withFakeQueueInteractions();
+
+        $job->handle();
+
+        $this->assertCount(0, Storage::disk('recordings-spool')->allFiles());
+        $this->assertCount(1, $meeting->room->recordings);
+        $this->assertCount(5, $meeting->room->recordings->first()->formats);
+        $this->assertFileExists(Storage::disk('recordings')->path(self::INTERNAL_MEETING_ID.'/notes/notes.pdf'));
+        Log::assertNotLogged(fn (LogEntry $log) => str_starts_with($log->message, 'Discarded recording of meeting'));
+    }
 }

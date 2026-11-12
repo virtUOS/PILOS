@@ -119,6 +119,7 @@ Customize the texts as described in [Locales](../09-customisation/02-locales.md)
 ## Meeting summaries tab
 
 After a meeting with a meeting summary ends, PILOS asks the summary service for the result in a queued job (`GET /api/v1/registrations/{internal meeting id}`).
+PILOS notices the end through the signed meeting end callback of BigBlueButton (`meetingEndedURL`) or, if the callback does not arrive, through the server poll within about a minute.
 It polls 2, 5, 10 and 30 minutes apart, then hourly, and stops when the result is stored, the registration is not found (404) or cancelled, the job failed or was not delivered, or 24 hours after the meeting end.
 Network errors, HTTP 429 and HTTP 5xx count as "not yet" and are polled again on the same schedule; other client errors fail the job.
 

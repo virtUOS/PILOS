@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Backend\Feature\api\v1\Room;
 
 use App\Jobs\CancelRecapRegistration;
+use App\Jobs\PollMeetingSummary;
 use App\Jobs\RegisterRecapMeeting;
 use App\Models\Meeting;
 use App\Models\Room;
@@ -139,6 +140,32 @@ class RoomRecapStartTest extends TestCase
         $this->assertEquals('true', $createParameters['meta_summary-enabled']);
         $this->assertEquals('meeting-summary', $createParameters['meta_summary-type']);
         $this->assertEquals('docs-main', $createParameters['meta_summary-sink']);
+    }
+
+    /**
+     * The meeting end reaches PILOS through the signed meetingEndedURL; only a valid callback ends the meeting and
+     * starts polling for the summary, an unsigned callback (old salt URL) is rejected and the server poll ends the meeting later
+     */
+    public function test_end_callback_dispatches_summary_poll()
+    {
+        Queue::fake();
+
+        $createParameters = $this->startRoom();
+        $meeting = $this->room->refresh()->latestMeeting;
+
+        $this->assertArrayNotHasKey('meta_endCallbackUrl', $createParameters);
+        $callbackUrl = $createParameters['meetingEndedURL'];
+        $this->assertStringContainsString('signature=', $callbackUrl);
+
+        $this->get(route('api.v1.meetings.endcallback', ['meeting' => $meeting]))->assertUnauthorized();
+        $this->assertNull($meeting->fresh()->end);
+        Queue::assertNotPushed(PollMeetingSummary::class);
+
+        // BBB may append parameters to the callback URL
+        $this->get($callbackUrl.'&recordingmarks=true&meetingID='.$meeting->id)->assertSuccessful();
+        $this->assertNotNull($meeting->fresh()->end);
+        Queue::assertPushed(PollMeetingSummary::class, 1);
+        Queue::assertPushed(PollMeetingSummary::class, fn (PollMeetingSummary $job) => $job->meeting->is($meeting));
     }
 
     public function test_start_registers_owner()

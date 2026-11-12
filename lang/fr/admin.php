@@ -184,6 +184,13 @@ return [
         'no_data' => 'Aucun type de salle trouvé!',
         'no_data_filtered' => 'Aucune salle existante avec ces filtres de recherche !',
         'preview' => 'Aperçu',
+        'recap' => [
+            'enforced_hint' => 'Les résumés de réunion peuvent seulement être imposés comme désactivés.',
+            'sink' => 'Destination du résumé',
+            'sink_description' => 'Nom de la destination à laquelle les résumés sont livrés. Lettres minuscules, chiffres et tirets.',
+            'type' => 'Type de réunion',
+            'type_description' => 'Nom du type de réunion qui sélectionne le modèle de résumé. Lettres minuscules, chiffres et tirets.',
+        ],
         'restrict' => 'Restreindre l\'utilisation',
         'restrict_description' => 'L\'utilisation de ce type de salle et des serveurs correspondants sera limitée aux rôles sélectionnés.',
         'search_aria' => 'Rechercher des types de salles',

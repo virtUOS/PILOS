@@ -43,7 +43,7 @@ class User extends Authenticatable implements HasLocalePreference
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'oidc_sub',
     ];
 
     /**

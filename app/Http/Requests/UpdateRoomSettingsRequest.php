@@ -11,6 +11,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRoomSettingsRequest extends FormRequest
 {
+    /**
+     * Keep the current recap setting if the user is not allowed to change it
+     * or if the feature is not available for the room.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->room->isRecapAvailable() || ! $this->user()->can('manageRecap', $this->room)) {
+            $this->merge(['recap' => $this->room->recap]);
+        }
+    }
+
     public function rules()
     {
         $rules = [

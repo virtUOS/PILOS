@@ -48,6 +48,7 @@ return [
         'bbb_style' => 'CSS Style Datei',
         'city' => 'Stadt',
         'color' => 'Farbe',
+        'consent_recap' => 'Zustimmung zur Transkription und KI-Zusammenfassung des Tons',
         'consent_record' => 'Zustimmung zur Aufzeichnung der Videokonferenz',
         'consent_record_attendance' => 'Zustimmung zur Anwesenheitserfassung',
         'consent_record_video' => 'Zustimmung zur Aufnahme eigener Videos',
@@ -118,6 +119,9 @@ return [
         'per_page' => 'Einträge pro Seite',
         'permissions' => 'Rechte',
         'phone' => 'Telefonnummer',
+        'recap' => 'Besprechungszusammenfassung',
+        'recap_sink' => 'Ziel der Zusammenfassung',
+        'recap_type' => 'Besprechungsart der Zusammenfassung',
         'recording_attendance_retention_period' => 'Speicherdauer der Anwesenheitsprotokollierung in Tagen',
         'recording_meeting_usage_enabled' => 'Auslastung der Meetings aufzeichnen',
         'recording_meeting_usage_retention_period' => 'Speicherdauer der Meetingauslastung in Tagen',
@@ -201,6 +205,9 @@ return [
             ],
             'required' => 'Die Einstellungen für den Banner für Mitteilungen fehlen!',
         ],
+        'consent_recap' => [
+            'accepted' => 'Die Zustimmung zur Transkription und KI-Zusammenfassung des Tons muss erteilt werden.',
+        ],
         'consent_record' => [
             'accepted' => 'Die Zustimmung zur Aufzeichnung der Videokonferenz muss erteilt werden.',
         ],
@@ -218,6 +225,15 @@ return [
             'in' => 'Die gewählte Sprache wird vom Server nicht unterstützt.',
         ],
         'password' => 'Das Passwort muss mindestens ein Zeichen aus jeder der folgenden vier Kategorien enthalten: Großbuchstabe (A - Z), Kleinbuchstaben (a - z), Zahl (0 - 9), nicht alphanumerisches Zeichen (zum Beispiel: !, $, #, oder %).',
+        'recap_default' => [
+            'declined_if' => 'Besprechungszusammenfassungen können nur ausgeschaltet erzwungen werden, nicht eingeschaltet.',
+        ],
+        'recap_sink' => [
+            'regex' => 'Das Feld :attribute darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten, muss mit einem Buchstaben beginnen und darf höchstens 63 Zeichen lang sein.',
+        ],
+        'recap_type' => [
+            'regex' => 'Das Feld :attribute darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten, muss mit einem Buchstaben beginnen und darf höchstens 63 Zeichen lang sein.',
+        ],
         'replacement_room_type' => [
             'exists' => 'Ersatzraumart ungültig! Es wird eine Ersatzraumart benötigt, da dieser Raumart noch Räume zugeordnet sind.',
             'not_in' => 'Ersatzraumart ungültig! Es wird eine Ersatzraumart benötigt, da dieser Raumart noch Räume zugeordnet sind.',
@@ -273,6 +289,7 @@ return [
     'custom_parameter_invalid' => 'Der Wert des Parameters :parameter ist ungültig.',
     'custom_parameter_missing' => 'Dem Parameter :parameter fehlt ein Wert.',
     'custom_parameter_not_found' => 'Der Parameter :parameter existiert nicht.',
+    'custom_parameter_reserved' => 'Der Parameter :parameter ist reserviert und kann hier nicht gesetzt werden.',
     'date' => ':attribute muss ein gültiges Datum sein.',
     'date_equals' => ':attribute muss ein Datum gleich :date sein.',
     'date_format' => ':attribute entspricht nicht dem gültigen Format für :format.',

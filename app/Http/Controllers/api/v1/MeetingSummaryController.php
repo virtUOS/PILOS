@@ -89,9 +89,11 @@ class MeetingSummaryController extends Controller
         $start = $meetingSummary->start->copy()->setTimezone($timezone)->format('Y-m-d-Hi');
         $filename = preg_replace('/[^A-Za-z0-9_-]/', '-', 'meeting-summary-'.$room->id.'-'.$start).'.md';
 
+        // Same protection as room files: never rendered as a document, no active content if opened directly
         return response($meetingSummary->content, 200, [
             'Content-Type' => 'text/markdown; charset=utf-8',
             'Content-Disposition' => HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $filename),
+            'Content-Security-Policy' => "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }

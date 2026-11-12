@@ -160,6 +160,7 @@ class MeetingSummaryTest extends TestCase
             ->assertOk()
             ->assertHeader('Content-Type', 'text/markdown; charset=utf-8')
             ->assertHeader('Content-Disposition', 'attachment; filename=meeting-summary-abc-def-123-2026-11-12-0930.md')
+            ->assertHeader('Content-Security-Policy', "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
             ->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->assertSame("# Summary\n\n- Ada Testperson: täglich <b>prüfen</b>\n", $response->getContent());
 

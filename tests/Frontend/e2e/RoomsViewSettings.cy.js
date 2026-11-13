@@ -868,6 +868,96 @@ describe("Rooms view settings", function () {
       .and("not.be.disabled");
   });
 
+  it("meeting summary setting", function () {
+    cy.fixture("config.json").then((config) => {
+      config.data.general.base_url = Cypress.config("baseUrl");
+      config.data.recap = { enabled: true };
+
+      cy.intercept("GET", "api/v1/config", {
+        statusCode: 200,
+        body: config,
+      });
+    });
+
+    cy.fixture("roomSettings.json").then((roomSettings) => {
+      roomSettings.data.recap = false;
+      roomSettings.data.recap_available = true;
+
+      cy.intercept("GET", "api/v1/rooms/abc-def-123/settings", {
+        statusCode: 200,
+        body: roomSettings,
+      }).as("roomSettingsRequest");
+
+      cy.visit("/rooms/abc-def-123#tab=settings");
+      cy.wait("@roomSettingsRequest");
+
+      // Room owner can enable the meeting summary
+      cy.contains("rooms.settings.recap.title").should("be.visible");
+      cy.get('[data-test="room-setting-recap"]')
+        .should("include.text", "rooms.settings.recordings.recap")
+        .and("not.include.text", "rooms.settings.recordings.recap_unavailable")
+        .find("#room-setting-recap")
+        .should("not.be.checked")
+        .and("not.be.disabled")
+        .click();
+
+      const newRoomSettings = structuredClone(roomSettings);
+      newRoomSettings.data.recap = true;
+
+      cy.intercept("PUT", "api/v1/rooms/abc-def-123", {
+        statusCode: 200,
+        body: newRoomSettings,
+      }).as("roomSettingsSaveRequest");
+    });
+
+    cy.get('[data-test="room-settings-save-button"]').click();
+
+    cy.wait("@roomSettingsSaveRequest").then((interception) => {
+      expect(interception.request.body.recap).to.be.true;
+    });
+
+    cy.get("#room-setting-recap").should("be.checked");
+
+    // Room owner has not logged in via OpenID Connect yet
+    cy.fixture("roomSettings.json").then((roomSettings) => {
+      roomSettings.data.recap = false;
+      roomSettings.data.recap_available = false;
+
+      cy.intercept("GET", "api/v1/rooms/abc-def-123/settings", {
+        statusCode: 200,
+        body: roomSettings,
+      }).as("roomSettingsRequest");
+    });
+
+    cy.reload();
+    cy.wait("@roomSettingsRequest");
+
+    cy.get('[data-test="room-setting-recap"]')
+      .should("include.text", "rooms.settings.recordings.recap_unavailable")
+      .find("#room-setting-recap")
+      .should("be.disabled");
+
+    // Co-owners cannot change the setting
+    cy.fixture("room.json").then((room) => {
+      room.data.owner = { id: 2, name: "Max Doe" };
+      room.data.is_member = true;
+      room.data.is_co_owner = true;
+
+      cy.intercept("GET", "api/v1/rooms/abc-def-123", {
+        statusCode: 200,
+        body: room,
+      }).as("roomRequest");
+    });
+
+    cy.reload();
+    cy.wait("@roomRequest");
+    cy.wait("@roomSettingsRequest");
+
+    cy.get('[data-test="room-setting-allow_guests"]').should("be.visible");
+    cy.contains("rooms.settings.recap.title").should("not.exist");
+    cy.get('[data-test="room-setting-recap"]').should("not.exist");
+  });
+
   it("change settings", function () {
     cy.fixture("roomTypesWithSettings.json").then((roomTypes) => {
       cy.fixture("roomSettings.json").then((roomSettings) => {

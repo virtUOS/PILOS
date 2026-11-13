@@ -420,6 +420,128 @@ describe("Rooms view meetings", function () {
     );
   });
 
+  it("join running meeting with meeting summary", function () {
+    cy.fixture("room.json").then((room) => {
+      room.data.last_meeting = {
+        start: "2023-08-21T08:18:28.000000Z",
+        end: null,
+      };
+
+      cy.intercept("GET", "api/v1/rooms/abc-def-123", {
+        statusCode: 200,
+        body: room,
+      }).as("roomRequest");
+    });
+
+    cy.intercept("OPTIONS", "api/v1/rooms/abc-def-123/join", {
+      statusCode: 200,
+      body: {
+        data: {
+          features: {
+            recording: false,
+            recap: true,
+            attendance_recording: false,
+            streaming: false,
+          },
+        },
+      },
+    }).as("preJoinRequest");
+
+    cy.intercept("POST", "/api/v1/rooms/abc-def-123/join*", {
+      statusCode: 200,
+      body: {
+        url: `${Cypress.expose("redirectBaseUrl")}/bigbluebutton?foo=a&bar=b`,
+      },
+    }).as("joinRequest");
+
+    cy.visit("/rooms/abc-def-123");
+
+    cy.wait("@roomRequest");
+
+    cy.get('[data-test="room-join-button"]').click();
+
+    // Check that the consent for the meeting summary is shown, without the video consent
+    cy.get('[data-test="room-join-dialog"]')
+      .should("be.visible")
+      .within(() => {
+        cy.contains("rooms.recap_info").should("be.visible");
+        cy.contains("rooms.recap_accept").should("be.visible");
+        cy.contains("rooms.recording_hint").should("be.visible");
+        cy.contains("rooms.recording_info").should("not.exist");
+        cy.contains("rooms.recording_video_accept").should("not.exist");
+        cy.get("#record-video-agreement").should("not.exist");
+
+        cy.get("#record-agreement").should("not.be.checked").click();
+        cy.get('[data-test="dialog-continue-button"]').click();
+      });
+
+    cy.wait("@preJoinRequest");
+
+    // Check that correct query is sent
+    cy.wait("@joinRequest").then((interception) => {
+      expect(interception.request.body).to.eql({
+        name: null,
+        consent_record_attendance: false,
+        consent_record: true,
+        consent_record_video: false,
+        consent_streaming: false,
+        dark_mode: false,
+      });
+    });
+
+    // Check if redirect worked
+    cy.url().should(
+      "eq",
+      `${Cypress.expose("redirectBaseUrl")}/bigbluebutton?foo=a&bar=b`,
+    );
+  });
+
+  it("join running meeting with recording and meeting summary", function () {
+    cy.fixture("room.json").then((room) => {
+      room.data.last_meeting = {
+        start: "2023-08-21T08:18:28.000000Z",
+        end: null,
+      };
+      room.data.record = true;
+
+      cy.intercept("GET", "api/v1/rooms/abc-def-123", {
+        statusCode: 200,
+        body: room,
+      }).as("roomRequest");
+    });
+
+    cy.intercept("OPTIONS", "api/v1/rooms/abc-def-123/join", {
+      statusCode: 200,
+      body: {
+        data: {
+          features: {
+            recording: true,
+            recap: true,
+            attendance_recording: false,
+            streaming: false,
+          },
+        },
+      },
+    }).as("preJoinRequest");
+
+    cy.visit("/rooms/abc-def-123");
+
+    cy.wait("@roomRequest");
+
+    cy.get('[data-test="room-join-button"]').click();
+
+    // Check that the combined consent is shown, with the video consent
+    cy.get('[data-test="room-join-dialog"]')
+      .should("be.visible")
+      .within(() => {
+        cy.contains("rooms.recording_recap_info").should("be.visible");
+        cy.contains("rooms.recording_recap_accept").should("be.visible");
+        cy.contains("rooms.recording_video_accept").should("be.visible");
+        cy.get("#record-agreement").should("not.be.checked");
+        cy.get("#record-video-agreement").should("not.be.checked");
+      });
+  });
+
   it("join running meeting guests", function () {
     cy.intercept("GET", "api/v1/currentUser", {});
 

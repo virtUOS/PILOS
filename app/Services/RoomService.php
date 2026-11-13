@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\CustomStatusCodes;
 use App\Events\RoomStarted;
+use App\Jobs\RegisterRecapMeeting;
 use App\Models\Meeting;
 use App\Models\Room;
 use App\Prometheus\Counter;
@@ -79,6 +80,7 @@ class RoomService
             $meeting = new Meeting;
             $meeting->record_attendance = $this->room->getRoomSetting('record_attendance');
             $meeting->record = $this->room->getRoomSetting('record');
+            $meeting->recap = $this->isRecapActive();
             $meeting->server()->associate($server);
             $meeting->room()->associate($this->room);
             $meeting->save();
@@ -105,6 +107,11 @@ class RoomService
             $meeting->start = date('Y-m-d H:i:s');
             $meeting->save();
 
+            // Register the room owner with the meeting summary service
+            if ($meeting->recap) {
+                RegisterRecapMeeting::dispatch($meeting, $this->room->owner);
+            }
+
             // Change latest meeting or the room to newly created meeting
             $this->room->latestMeeting()->associate($meeting);
 
@@ -126,6 +133,20 @@ class RoomService
         $this->room->save();
 
         return $meetingService;
+    }
+
+    /**
+     * Indicates whether a new meeting of this room should create a meeting summary (recap).
+     *
+     * Requires the feature, an owner with OIDC subject, the effective room setting recap,
+     * and a meeting type and sink on the room type. The recording setting of the room is not required.
+     */
+    public function isRecapActive(): bool
+    {
+        return $this->room->isRecapAvailable()
+            && $this->room->getRoomSetting('recap')
+            && ! empty($this->room->roomType->recap_type)
+            && ! empty($this->room->roomType->recap_sink);
     }
 
     /**

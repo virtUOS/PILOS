@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "model_name": "MeetingSummary",
+      "start": "2022-08-17T09:20:35.000000Z",
+      "end": "2022-08-17T09:40:52.000000Z",
+      "delivered_at": "2022-08-17T09:55:00.000000Z",
+      "access": 3,
+      "type": "document",
+      "document_url": "https://docs.example.com/docs/0b6b7c7e-5d3c-4c1e-9a43-3f0c2f6d9a11/"
+    },
+    {
+      "id": 2,
+      "model_name": "MeetingSummary",
+      "start": "2022-08-16T08:00:00.000000Z",
+      "end": "2022-08-16T09:00:00.000000Z",
+      "delivered_at": "2022-08-16T09:20:00.000000Z",
+      "access": 1,
+      "type": "content",
+      "document_url": null
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "per_page": 2,
+    "to": 2,
+    "total": 2,
+    "total_no_filter": 2
+  }
+}

@@ -87,6 +87,9 @@ class OIDCProvider
         // Get eloquent user (existing or new)
         $user = $oidc_user->createOrFindEloquentModel('oidc');
 
+        // Store the subject identifier, it is used to identify the user in external services
+        $user->oidc_sub = $user_info['sub'];
+
         // Sync attributes
         $oidc_user->syncWithEloquentModel($user, config('services.oidc.mapping')->roles);
 

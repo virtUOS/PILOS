@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Room;
 use App\Settings\BannerSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\RecordingSettings;
@@ -107,6 +108,9 @@ class ConfigResource extends JsonResource
                 'enabled' => config('streaming.enabled'),
                 'refresh_interval' => config('streaming.refresh_interval'),
                 'show_fps' => config('streaming.show_fps'),
+            ],
+            'recap' => [
+                'enabled' => Room::isRecapEnabled(),
             ],
             'auth' => [
                 'local' => config('auth.local.enabled'),

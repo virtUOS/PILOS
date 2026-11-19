@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Experimental AI meeting summaries via an external summary service, independent of the recording setting of the room: room setting for the room owner in its own section, meeting type and destination per room type, owner registration and cancellation on room deletion, consent texts for meetings with summary only and with recording and summary; playback recordings of meetings with summary only are not imported
+- Meeting summaries tab in the room: PILOS polls the summary service after a meeting with summary ends and lists the result per meeting, either as a link to the document in the owner's account (opens only for people the owner shares it with) or as the summary text available as a Markdown file download; access per summary like recordings (default owner and co-owners, changed or deleted by owner and co-owners), deleted after the recording retention period and with the room
+
+## [v4.20.1] - 2026-11-19
+
+### Security
+
+- Updated PHP to 8.5.13 ([#3656])
+- Updated NGINX to 1.30.7-r0 ([#3656])
+- Default PHP ini values ([#3656])
+- Bumped PHP dependency jwt-framework ([#3656])
+
 ## [v4.20.0] - 2026-11-09
 
 ### Changed
@@ -980,7 +994,8 @@ You can find the changelog for older versions there [here](https://github.com/TH
 [#3588]: https://github.com/THM-Health/PILOS/pull/3588
 [#3603]: https://github.com/THM-Health/PILOS/issues/3603
 [#3604]: https://github.com/THM-Health/PILOS/pull/3604
-[unreleased]: https://github.com/THM-Health/PILOS/compare/v4.20.0...develop
+[#3656]: https://github.com/THM-Health/PILOS/pull/3656
+[unreleased]: https://github.com/THM-Health/PILOS/compare/v4.20.1...develop
 [v3.0.0]: https://github.com/THM-Health/PILOS/releases/tag/v3.0.0
 [v3.0.1]: https://github.com/THM-Health/PILOS/releases/tag/v3.0.1
 [v3.0.2]: https://github.com/THM-Health/PILOS/releases/tag/v3.0.2
@@ -1016,3 +1031,4 @@ You can find the changelog for older versions there [here](https://github.com/TH
 [v4.18.3]: https://github.com/THM-Health/PILOS/releases/tag/v4.18.3
 [v4.19.0]: https://github.com/THM-Health/PILOS/releases/tag/v4.19.0
 [v4.20.0]: https://github.com/THM-Health/PILOS/releases/tag/v4.20.0
+[v4.20.1]: https://github.com/THM-Health/PILOS/releases/tag/v4.20.1

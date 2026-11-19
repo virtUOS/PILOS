@@ -7,6 +7,7 @@ namespace App\Http\Resources;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 class RoomSettingsResource extends JsonResource
 {
@@ -36,6 +37,7 @@ class RoomSettingsResource extends JsonResource
             'short_description' => $this->short_description,
             'access_code' => $this->access_code,
             'room_type' => (new RoomTypeResource($this->roomType))->withDefaultRoomSettings()->withFeatures(),
+            'recap_available' => $this->when(Auth::user()?->can('manageRecap', $this->resource) ?? false, fn () => $this->isRecapAvailable()),
             $this->merge($this->getRoomSettings()),
         ];
     }

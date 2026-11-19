@@ -241,6 +241,7 @@ class RoomController extends Controller
     {
         $features = [
             'recording' => $room->getRoomSetting('record'),
+            'recap' => (new RoomService($room))->isRecapActive(),
             'attendance_recording' => $room->getRoomSetting('record_attendance'),
             'streaming' => $room->streaming->enabled,
         ];
@@ -254,6 +255,7 @@ class RoomController extends Controller
 
         $features = [
             'recording' => $meeting?->record ?? false,
+            'recap' => $meeting?->recap ?? false,
             'attendance_recording' => $meeting?->record_attendance ?? false,
             'streaming' => $meeting ? $room->streaming->enabled_for_current_meeting : false,
         ];

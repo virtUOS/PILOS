@@ -9,6 +9,7 @@ use App\Enums\RoomUserRole;
 use App\Events\RoomEnded;
 use App\Http\Requests\JoinMeetingRequest;
 use App\Http\Requests\StartMeetingRequest;
+use App\Jobs\PollMeetingSummary;
 use App\Models\Meeting;
 use App\Models\MeetingAttendee;
 use App\Models\User;
@@ -84,8 +85,9 @@ class MeetingService
         }
 
         // Room settings take precedence
+        // A meeting summary needs the recording marks of BBB, so the meeting is recorded even if the room setting is off
         $meetingParams
-            ->setRecord($this->meeting->record)
+            ->setRecord($this->meeting->recap ? true : $this->meeting->record)
             ->setAutoStartRecording($this->meeting->room->auto_start_recording)
             ->setLogoutURL(url('rooms/'.$this->meeting->room->id))
             ->setMeetingEndedURL($this->getCallbackUrl())
@@ -104,6 +106,15 @@ class MeetingService
 
         $meetingParams->addMeta('bbb-origin', 'PILOS');
         $meetingParams->addMeta('pilos-sub-spool-dir', config('recording.spool-sub-directory'));
+
+        // Opt in to a meeting summary (recap), keys defined by the recap metadata interface v1
+        if ($this->meeting->recap) {
+            $recapPrefix = config('recap.meta_prefix');
+            $meetingParams->addMeta($recapPrefix.'-v', '1');
+            $meetingParams->addMeta($recapPrefix.'-enabled', 'true');
+            $meetingParams->addMeta($recapPrefix.'-type', $this->meeting->room->roomType->recap_type);
+            $meetingParams->addMeta($recapPrefix.'-sink', $this->meeting->room->roomType->recap_sink);
+        }
 
         // get files that should be used in this meeting and add links to the files
         $files = $this->meeting->room->files()->where('use_in_meeting', true)->orderBy('default', 'desc')->get();
@@ -175,6 +186,10 @@ class MeetingService
 
             return null;
         }
+
+        // Internal meeting id, used as record id of the recording
+        $this->meeting->internal_meeting_id = $result->getInternalMeetingId();
+        $this->meeting->save();
 
         return $result;
     }
@@ -504,6 +519,11 @@ class MeetingService
 
         RoomEnded::dispatch($this->meeting->room);
 
+        // Poll the meeting summary service for the result of this meeting
+        if ($this->meeting->recap && ! empty($this->meeting->internal_meeting_id) && RecapService::isConfigured()) {
+            PollMeetingSummary::dispatchAfterEnd($this->meeting);
+        }
+
         // set end time of the attendance to the end time of the meeting
         // for all users that have been present to the end
         foreach ($this->meeting->attendees()->whereNull('leave')->get() as $attendee) {
@@ -683,6 +703,9 @@ class MeetingService
         // If meeting has recording enabled, add parameter to allow recording of own video
         if ($this->meeting->record) {
             $joinMeetingParams->addUserData('bbb_record_video', $request->consent_record_video);
+        } elseif ($this->meeting->recap) {
+            // Meeting summary without recording, camera video is never recorded
+            $joinMeetingParams->addUserData('bbb_record_video', false);
         }
 
         // If a custom style file is set, pass url to bbb html5 client

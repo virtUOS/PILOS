@@ -48,6 +48,7 @@ return [
         'bbb_style' => 'Fichier de styles CSS',
         'city' => 'Ville',
         'color' => 'Couleur',
+        'consent_recap' => 'Consentement à la transcription et au résumé du son par une IA',
         'consent_record' => 'Consentement à l\'enregistrement de la vidéo conférence',
         'consent_record_attendance' => 'Consentement à la sauvegarde des présences',
         'consent_record_video' => 'Consentement à enregistrer sa propre vidéo',
@@ -118,6 +119,9 @@ return [
         'per_page' => 'Entrées par page',
         'permissions' => 'Permissions',
         'phone' => 'Téléphone',
+        'recap' => 'Résumé de la réunion',
+        'recap_sink' => 'Destination du résumé',
+        'recap_type' => 'Type de réunion du résumé',
         'recording_attendance_retention_period' => 'Nombre de jours de rétention de l\'historique des présences',
         'recording_meeting_usage_enabled' => 'Enregistrer les statistiques des salles',
         'recording_meeting_usage_retention_period' => 'Nombre de jours de rétention des statistiques des salles',
@@ -201,6 +205,9 @@ return [
             ],
             'required' => 'Les paramètres de la bannière de message sont manquants!',
         ],
+        'consent_recap' => [
+            'accepted' => 'Le consentement à la transcription et au résumé du son par une IA est requis pour continuer.',
+        ],
         'consent_record' => [
             'accepted' => 'Le consentement d\'enregistrement de la vidéo conférence est requis pour continuer.',
         ],
@@ -218,6 +225,15 @@ return [
             'in' => 'La langue sélectionné n\'est pas supportée par le serveur.',
         ],
         'password' => 'Le mot de passe doit contenir au moins un caractère de chacune des quatre catégories suivantes : lettre majuscule (A-Z), lettre minuscule (a-z), chiffre (0-9), caractère non alphanumérique (par exemple : !, $ , #, ou %).',
+        'recap_default' => [
+            'declined_if' => 'Les résumés de réunion peuvent seulement être imposés comme désactivés.',
+        ],
+        'recap_sink' => [
+            'regex' => 'Le champ :attribute ne peut contenir que des lettres minuscules, des chiffres et des tirets, doit commencer par une lettre et comporter au plus 63 caractères.',
+        ],
+        'recap_type' => [
+            'regex' => 'Le champ :attribute ne peut contenir que des lettres minuscules, des chiffres et des tirets, doit commencer par une lettre et comporter au plus 63 caractères.',
+        ],
         'replacement_room_type' => [
             'exists' => 'Type de salle de remplacement invalide ! Un type de salle de remplacement est requis car des salles sont toujours attribuées à ce type de salle.',
             'not_in' => 'Type de salle de remplacement invalide ! Un type de salle de remplacement est requis car des salles sont toujours attribuées à ce type de salle.',
@@ -273,6 +289,7 @@ return [
     'custom_parameter_invalid' => 'La valeur du paramètre :parameter est invalide.',
     'custom_parameter_missing' => 'La valeur du paramètre :parameter est manquante.',
     'custom_parameter_not_found' => 'Le paramètre :parameter n\'existe pas.',
+    'custom_parameter_reserved' => 'Le paramètre :parameter est réservé et ne peut pas être défini ici.',
     'date' => 'Le champ :attribute n\'est pas une date valide.',
     'date_equals' => 'Le champ :attribute doit être une date égale à :date.',
     'date_format' => 'Le champ :attribute ne correspond pas au format :format.',

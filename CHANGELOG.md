@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to enforce light or dark color mode ([#3557])
 - Popover to show dial-in number and pin during a running meeting ([#1143], [#1810])
 - Option to disable recordings using the `RECORDING_ENABLED` environment variable ([#3633], [#3635])
+- Experimental AI meeting summaries using an external summary service, opted in by the room owner and configured per room type
+- Meeting summaries tab in rooms to open, download, change access to and delete the summaries of past meetings
 
 ### Changed
 

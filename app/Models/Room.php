@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 #[ObservedBy([RoomObserver::class])]
@@ -122,6 +124,10 @@ class Room extends Model
             'cast' => 'boolean',
             'expert' => true,
         ],
+        'recap' => [
+            'cast' => 'boolean',
+            'expert' => false,
+        ],
     ];
 
     /**
@@ -174,6 +180,16 @@ class Room extends Model
     public function recordings()
     {
         return $this->hasMany(Recording::class)->chaperone();
+    }
+
+    /**
+     * Meeting summaries (results of the meeting summary service)
+     *
+     * @return HasMany
+     */
+    public function meetingSummaries()
+    {
+        return $this->hasMany(MeetingSummary::class)->chaperone();
     }
 
     /**
@@ -406,6 +422,37 @@ class Room extends Model
 
         // If the expert mode is deactivated for the room and the setting is an expert-setting: use room type default value
         return $this->roomType[$settingName.'_default'];
+    }
+
+    /**
+     * Indicates whether the meeting summary (recap) feature is enabled.
+     * An invalid meta parameter prefix disables the feature, as the meta parameters would not match the recording exporter of the summary service.
+     * The warning about an invalid prefix is logged at most once per hour, as this is checked on every page load.
+     */
+    public static function isRecapEnabled(): bool
+    {
+        if (! config('recap.enabled')) {
+            return false;
+        }
+
+        if (preg_match('/^[a-z][a-z0-9]{1,15}$/', (string) config('recap.meta_prefix')) !== 1) {
+            if (Cache::add('recap-invalid-meta-prefix-logged', true, now()->addHour())) {
+                Log::warning('Meeting summaries disabled: RECAP_META_PREFIX must match ^[a-z][a-z0-9]{1,15}$');
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Indicates whether the meeting summary (recap) can be activated for this room.
+     * Requires the feature to be enabled and the room owner to have logged in via OIDC (stored subject).
+     */
+    public function isRecapAvailable(): bool
+    {
+        return self::isRecapEnabled() && ! empty($this->owner->oidc_sub);
     }
 
     /**

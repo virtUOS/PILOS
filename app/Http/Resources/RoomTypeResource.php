@@ -103,6 +103,8 @@ class RoomTypeResource extends JsonResource
                 'max_duration' => $this->max_duration,
                 'create_parameters' => $this->create_parameters,
                 'join_parameters' => $this->join_parameters,
+                'recap_type' => $this->recap_type,
+                'recap_sink' => $this->recap_sink,
                 'roles' => new RoleResourceCollection($this->roles),
             ]),
 

@@ -2979,7 +2979,7 @@ class RoomTest extends TestCase
 
         // Check if correct setting values get returned
         $new_settings = $response->json('data');
-        $settings['room_type'] = (new RoomTypeResource($roomType))->withDefaultRoomSettings()->withFeatures();
+        $settings['room_type'] = (new RoomTypeResource($roomType->refresh()))->withDefaultRoomSettings()->withFeatures();
         $settings['allow_membership'] = false;
         $settings['everyone_can_start'] = false;
         $settings['lock_settings_disable_cam'] = true;
@@ -2996,6 +2996,8 @@ class RoomTest extends TestCase
         $settings['record_attendance'] = false;
         $settings['record'] = false;
         $settings['auto_start_recording'] = false;
+        $settings['recap'] = false;
+        $settings['recap_available'] = false;
 
         $this->assertJsonStringEqualsJsonString(json_encode($new_settings), json_encode($settings));
 

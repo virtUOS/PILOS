@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Enums\TimePeriod;
+use App\Models\MeetingSummary;
 use App\Models\Recording;
 use App\Settings\RecordingSettings;
 use Illuminate\Console\Command;
@@ -24,7 +25,7 @@ class CleanupRecordingsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Remove recordings after retention period';
+    protected $description = 'Remove recordings and meeting summaries after retention period';
 
     /**
      * Execute the console command.
@@ -42,6 +43,10 @@ class CleanupRecordingsCommand extends Command
             Recording::where('start', '<', $day)->get()->each(function ($recording) {
                 $recording->delete();
             });
+
+            // Meeting summaries follow the retention period of the recordings
+            Log::info('Removing meeting summaries older than '.$day);
+            MeetingSummary::where('start', '<', $day)->delete();
         }
     }
 }
